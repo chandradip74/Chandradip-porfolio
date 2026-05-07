@@ -1,0 +1,358 @@
+Design a modern full-featured Admin Dashboard UI in Figma for a dynamic portfolio management system. The dashboard will manage all portfolio resources including profile data, projects, technologies, services, achievements, media uploads, and contact messages.
+
+IMPORTANT:
+
+* Create both Light Mode and Dark Mode UI.
+* Use the exact design system variables and color theme provided below.
+* Follow a clean modern SaaS dashboard aesthetic similar to:
+
+  * Vercel
+  * Linear
+  * Notion
+  * shadcn/ui
+  * Supabase Dashboard
+* Use Inter Sans-Serif typography.
+* Use soft minimal shadows, premium spacing, and modern layouts.
+* Fully responsive desktop-first dashboard design.
+
+DESIGN SYSTEM:
+Use the provided theme variables exactly:
+
+* Background
+* Foreground
+* Card
+* Border
+* Sidebar
+* Accent
+* Muted
+* Primary
+* Radius
+* Typography
+* Light/Dark theme variables
+
+Do NOT use random colors outside the provided system.
+
+MAIN ADMIN DASHBOARD FEATURES:
+
+1. AUTHENTICATION PAGE
+
+* Modern login screen
+* Email input
+* Password input
+* Login button
+* Remember me
+* Forgot password
+* Clean split-screen layout
+* Dark/light theme support
+
+2. MAIN DASHBOARD LAYOUT
+
+Layout Structure:
+
+* Left collapsible sidebar
+* Top navbar
+* Main content area
+* Responsive mobile drawer sidebar
+
+Sidebar Navigation:
+
+* Dashboard
+* Profile
+* Technologies
+* Services
+* Projects
+* Journey Timeline
+* Achievements
+* Media Library
+* Messages
+* Settings
+* Logout
+
+Sidebar Features:
+
+* Active menu highlight
+* Minimal icon style
+* Smooth hover animation
+* User profile card at bottom
+* Dark/light mode toggle
+
+Top Navbar:
+
+* Search bar
+* Notification icon
+* Theme toggle switch
+* User avatar dropdown
+* Breadcrumb navigation
+
+3. DASHBOARD HOME PAGE
+
+Create analytics overview cards:
+
+* Total Projects
+* Total Services
+* Total Technologies
+* Total Achievements
+* Total Messages
+* Total Uploaded Media
+
+Analytics Section:
+
+* Upload activity chart
+* Monthly project statistics
+* Technology usage graph
+* Recent uploads activity
+
+Recent Activity Feed:
+
+* Recent uploaded certificates
+* Latest project updates
+* New messages
+* CV updates
+
+4. PROFILE MANAGEMENT PAGE
+
+Features:
+
+* Update profile image
+* Upload CV PDF
+* Edit name
+* Edit role array
+* Edit description
+* Edit about me
+
+Design:
+
+* Large profile card
+* Editable form sections
+* Image upload preview
+* Drag-and-drop CV upload
+* Save changes button
+
+5. TECHNOLOGY MANAGEMENT PAGE
+
+Features:
+
+* Add new technology
+* Edit technology
+* Delete technology
+* Upload technology icon
+
+Layout:
+
+* Modern table/grid layout
+* Technology cards
+* Search/filter
+* Inline actions
+
+6. SERVICES MANAGEMENT PAGE
+
+Features:
+
+* Create service
+* Edit service
+* Delete service
+* Upload icon/image
+* Add tags
+
+UI:
+
+* Service cards
+* Modal form popup
+* Dynamic tags input
+* Clean responsive form
+
+7. PROJECT MANAGEMENT PAGE
+
+Features:
+
+* Add project
+* Upload project image
+* Add technologies
+* Add GitHub/live links
+* Edit/delete project
+
+Design:
+
+* Modern project management table
+* Card/grid toggle
+* Preview modal
+* Upload progress UI
+* Multi-select technologies
+
+Project Card Contains:
+
+* Thumbnail
+* Title
+* Description
+* Tech badges
+* External links
+* Edit/Delete actions
+
+8. JOURNEY TIMELINE MANAGEMENT PAGE
+
+Features:
+
+* Add timeline entries
+* Edit journey
+* Delete journey
+
+Layout:
+
+* Vertical timeline preview
+* Timeline editor form
+* Label badges
+* Year selector
+
+9. ACHIEVEMENT MANAGEMENT PAGE
+
+Features:
+
+* Upload certificate image
+* Add company name
+* Add certificate tag
+* Edit/delete certificates
+
+Design:
+
+* Certificate preview cards
+* Modern gallery layout
+* Preview modal
+* Image uploader
+
+10. MEDIA LIBRARY PAGE
+
+IMPORTANT SECTION.
+
+Features:
+
+* Centralized media management
+* Display all uploaded:
+
+  * Images
+  * PDFs
+  * Videos
+  * Certificates
+  * Profile images
+
+Layout:
+
+* Modern cloud storage style UI
+* Grid + table toggle
+* Media preview cards
+* Upload progress bars
+* File filters
+* Search functionality
+* File type tabs
+* Drag-and-drop upload zone
+
+Media Card Contains:
+
+* File thumbnail
+* File type badge
+* Upload date
+* File size
+* Preview button
+* Delete button
+* Copy URL button
+
+11. CONTACT MESSAGES PAGE
+
+Features:
+
+* Inbox style message management
+* Message detail modal
+* Delete messages
+* Search/filter messages
+
+Design:
+
+* Modern email inbox layout
+* Message list panel
+* Message preview panel
+
+12. SETTINGS PAGE
+
+Features:
+
+* Theme preferences
+* Account settings
+* API configuration placeholders
+* Cloudinary status
+* MongoDB connection status
+* Logout section
+
+13. GLOBAL COMPONENTS
+
+Create reusable UI components:
+
+* Buttons
+* Inputs
+* Modals
+* Tables
+* Cards
+* Dropdowns
+* Tabs
+* Toast notifications
+* Tooltips
+* Loaders
+* Upload progress bars
+* Skeleton loaders
+* Pagination
+* Search bars
+
+14. FILE UPLOAD EXPERIENCE
+
+IMPORTANT:
+Design a premium upload experience.
+
+Features:
+
+* Drag-and-drop upload
+* Upload progress animation
+* File validation states
+* Upload success toast
+* File preview before upload
+* Multiple file upload support
+
+15. DESIGN STYLE
+
+Visual Style:
+
+* Minimal modern SaaS
+* Clean spacing
+* Rounded corners
+* Subtle borders
+* Elegant typography
+* Premium dashboard appearance
+
+Animation Ideas:
+
+* Smooth hover transitions
+* Fade-in cards
+* Sidebar expand/collapse
+* Modal transitions
+* Skeleton loading states
+
+16. RESPONSIVE DESIGN
+
+Create:
+
+* Desktop dashboard
+* Tablet layout
+* Mobile responsive sidebar
+* Mobile cards/table redesign
+
+17. FIGMA REQUIREMENTS
+
+Output:
+
+* High-fidelity Figma design
+* Auto-layout enabled
+* Component-based design system
+* Variants for dark/light theme
+* Proper constraints
+* Reusable UI library
+* Organized pages and sections
+
+IMPORTANT:
+The admin panel should feel like a professional cloud media management platform combined with a modern portfolio CMS system.

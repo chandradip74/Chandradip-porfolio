@@ -1,0 +1,150 @@
+@baseUrl = http://localhost:5000/api
+
+### ====================
+### PROFILE APIs
+### ====================
+
+### Get Profile
+GET {{baseUrl}}/profile
+Accept: application/json
+
+###
+
+### Update Profile
+# Note: This route expects multipart/form-data for file uploads (profileImage, cvFile).
+# The example below updates only text fields using standard JSON for simplicity, 
+# but a real client should use FormData.
+PUT {{baseUrl}}/profile
+Content-Type: application/json
+
+{
+  "name": "Alex Kumar (Updated)",
+  "role": "Senior Full-Stack Developer",
+  "description": "I craft elegant, high-performance web and mobile applications.",
+  "aboutMe": "I have over 5 years of experience building modern scalable solutions.",
+  "technologies": ["React", "Node.js", "MongoDB", "Express", "TypeScript"]
+}
+
+### ====================
+### SERVICE APIs
+### ====================
+
+### Get All Services
+GET {{baseUrl}}/services
+Accept: application/json
+
+###
+
+### Create a Service
+# Note: The backend supports 'icon' as a file upload. If sending as string, it works as below.
+POST {{baseUrl}}/services
+Content-Type: application/json
+
+{
+  "title": "Backend Architecture",
+  "description": "Designing robust, scalable backend services and APIs.",
+  "icon": "https://example.com/icon.png"
+}
+
+###
+
+### Update a Service
+# Note: Replace <SERVICE_ID> with an actual ID from the GET response
+@serviceId = <SERVICE_ID>
+PUT {{baseUrl}}/services/{{serviceId}}
+Content-Type: application/json
+
+{
+  "title": "Backend Architecture (Updated)",
+  "description": "Optimized database design and RESTful APIs."
+}
+
+###
+
+### Delete a Service
+DELETE {{baseUrl}}/services/{{serviceId}}
+
+### ====================
+### PROJECT APIs
+### ====================
+
+### Get All Projects
+GET {{baseUrl}}/projects
+Accept: application/json
+
+###
+
+### Create a Project
+POST {{baseUrl}}/projects
+Content-Type: application/json
+
+{
+  "title": "Portfolio API",
+  "description": "A dynamic Node.js backend for managing portfolio content.",
+  "projectLink": "https://github.com/yourusername/portfolio",
+  "technologies": ["Node.js", "Express", "MongoDB"]
+}
+
+###
+
+### Update a Project
+# Note: Replace <PROJECT_ID> with an actual ID from the GET response
+@projectId = <PROJECT_ID>
+PUT {{baseUrl}}/projects/{{projectId}}
+Content-Type: application/json
+
+{
+  "title": "Portfolio API (Updated)"
+}
+
+###
+
+### Delete a Project
+DELETE {{baseUrl}}/projects/{{projectId}}
+
+### ====================
+### ACHIEVEMENT APIs
+### ====================
+
+### Get All Achievements
+GET {{baseUrl}}/achievements
+Accept: application/json
+
+###
+
+### Create an Achievement
+POST {{baseUrl}}/achievements
+Content-Type: application/json
+
+{
+  "title": "AWS Certified Solutions Architect",
+  "description": "Achieved the associate level certification for AWS Cloud Architecture."
+}
+
+###
+
+### Delete an Achievement
+# Note: Replace <ACHIEVEMENT_ID> with an actual ID from the GET response
+@achievementId = <ACHIEVEMENT_ID>
+DELETE {{baseUrl}}/achievements/{{achievementId}}
+
+### ====================
+### CONTACT APIs
+### ====================
+
+### Get All Contacts (Messages)
+GET {{baseUrl}}/contact
+Accept: application/json
+
+###
+
+### Create a Contact (Send a Message)
+POST {{baseUrl}}/contact
+Content-Type: application/json
+
+{
+  "firstName": "John",
+  "lastName": "Doe",
+  "email": "john.doe@example.com",
+  "description": "Hello Alex! I would love to hire you for a new web project."
+}

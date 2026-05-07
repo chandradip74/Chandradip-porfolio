@@ -1,0 +1,223 @@
+import { useState, useEffect } from 'react';
+import { Plus, Pencil, Trash2, X, Save, Loader2, Trophy } from 'lucide-react';
+import { toast } from 'sonner';
+import { api } from '../lib/api';
+
+interface Achievement {
+  _id: string;
+  title: string;
+  description: string;
+  imageUrl: string;
+  certificateTag: string;
+  companyName: string;
+  iconPath: string;
+  certificateImage: string;
+}
+
+const TAG_COLORS: Record<string, string> = {
+  Cloud: 'bg-blue-500/10 text-blue-500',
+  Frontend: 'bg-cyan-500/10 text-cyan-500',
+  Backend: 'bg-green-500/10 text-green-500',
+  Database: 'bg-orange-500/10 text-orange-500',
+  Mobile: 'bg-purple-500/10 text-purple-500',
+  Design: 'bg-pink-500/10 text-pink-500',
+};
+
+export function AchievementsPage() {
+  const [achievements, setAchievements] = useState<Achievement[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editing, setEditing] = useState<Achievement | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Achievement | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [form, setForm] = useState({
+    title: '', description: '', imageUrl: '', certificateTag: '', companyName: '', iconPath: '',
+  });
+
+  const fetchAchievements = () => {
+    setLoading(true);
+    api.get('/achievements')
+      .then(setAchievements)
+      .catch(() => toast.error('Failed to load achievements'))
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => { fetchAchievements(); }, []);
+
+  const openAdd = () => {
+    setEditing(null);
+    setForm({ title: '', description: '', imageUrl: '', certificateTag: '', companyName: '', iconPath: '' });
+    setModalOpen(true);
+  };
+
+  const openEdit = (a: Achievement) => {
+    setEditing(a);
+    setForm({ title: a.title, description: a.description, imageUrl: a.imageUrl || '', certificateTag: a.certificateTag || '', companyName: a.companyName || '', iconPath: a.iconPath || '' });
+    setModalOpen(true);
+  };
+
+  const handleSave = async () => {
+    if (!form.title.trim()) { toast.error('Title is required'); return; }
+    if (!form.description.trim()) { toast.error('Description is required'); return; }
+    setSaving(true);
+    try {
+      if (editing) {
+        const updated = await api.put(`/achievements/${editing._id}`, form);
+        setAchievements(achievements.map((a) => a._id === editing._id ? updated : a));
+        toast.success('Achievement updated!');
+      } else {
+        const created = await api.post('/achievements', form);
+        setAchievements([...achievements, created]);
+        toast.success('Achievement added!');
+      }
+      setModalOpen(false);
+    } catch (e: any) {
+      toast.error(e.message || 'Failed to save');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async (a: Achievement) => {
+    try {
+      await api.del(`/achievements/${a._id}`);
+      setAchievements(achievements.filter((x) => x._id !== a._id));
+      setDeleteTarget(null);
+      toast.success('Achievement deleted');
+    } catch (e: any) {
+      toast.error(e.message || 'Failed to delete');
+    }
+  };
+
+  const inputCls = 'w-full px-3 py-2 text-sm bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-foreground placeholder:text-muted-foreground';
+
+  return (
+    <div className="max-w-6xl space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-foreground">Achievements</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">{achievements.length} certificates & awards</p>
+        </div>
+        <button onClick={openAdd} className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:opacity-90 transition-opacity">
+          <Plus className="w-4 h-4" /> Add Achievement
+        </button>
+      </div>
+
+      {loading ? (
+        <div className="flex items-center justify-center h-40"><Loader2 className="w-6 h-6 animate-spin text-muted-foreground" /></div>
+      ) : achievements.length === 0 ? (
+        <div className="text-center py-16 bg-card border border-border rounded-xl">
+          <Trophy className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+          <p className="text-muted-foreground">No achievements yet. Add your first certificate!</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          {achievements.map((ach) => (
+            <div key={ach._id} className="bg-card border border-border rounded-xl overflow-hidden hover:shadow-sm transition-all group">
+              {ach.imageUrl || ach.certificateImage ? (
+                <div className="h-36 bg-muted overflow-hidden">
+                  <img src={ach.imageUrl || ach.certificateImage} alt={ach.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                </div>
+              ) : (
+                <div className="h-2 w-full bg-primary" />
+              )}
+              <div className="p-5 flex flex-col gap-3">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-2">
+                    {ach.iconPath ? (
+                      <img src={ach.iconPath} className="w-8 h-8 object-contain" alt="" />
+                    ) : (
+                      <div className="w-8 h-8 rounded-lg bg-yellow-500/10 flex items-center justify-center">
+                        <Trophy className="w-4 h-4 text-yellow-500" />
+                      </div>
+                    )}
+                    {ach.certificateTag && (
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${TAG_COLORS[ach.certificateTag] || 'bg-accent text-accent-foreground'}`}>
+                        {ach.certificateTag}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button onClick={() => openEdit(ach)} className="w-7 h-7 rounded-md hover:bg-accent flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"><Pencil className="w-3.5 h-3.5" /></button>
+                    <button onClick={() => setDeleteTarget(ach)} className="w-7 h-7 rounded-md hover:bg-red-500/10 flex items-center justify-center text-muted-foreground hover:text-red-500 transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-foreground font-medium text-sm leading-snug">{ach.title}</h3>
+                  {ach.companyName && <p className="text-xs text-blue-500 mt-0.5">{ach.companyName}</p>}
+                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed line-clamp-2">{ach.description}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Modal */}
+      {modalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/50" onClick={() => setModalOpen(false)} />
+          <div className="relative bg-card border border-border rounded-2xl shadow-xl w-full max-w-lg p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between">
+              <h3 className="text-foreground font-medium">{editing ? 'Edit Achievement' : 'Add Achievement'}</h3>
+              <button onClick={() => setModalOpen(false)} className="w-8 h-8 rounded-lg hover:bg-accent flex items-center justify-center text-muted-foreground"><X className="w-4 h-4" /></button>
+            </div>
+            <div className="space-y-3">
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">Title</label>
+                <input type="text" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="e.g. AWS Certified Developer" className={inputCls} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">Description</label>
+                <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} placeholder="What did you achieve?" className={`${inputCls} resize-none`} />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-1">Company / Issuer</label>
+                  <input type="text" value={form.companyName} onChange={(e) => setForm({ ...form, companyName: e.target.value })} placeholder="e.g. Amazon Web Services" className={inputCls} />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-1">Category Tag</label>
+                  <input type="text" value={form.certificateTag} onChange={(e) => setForm({ ...form, certificateTag: e.target.value })} placeholder="e.g. Cloud, Frontend" className={inputCls} />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">Certificate Image URL</label>
+                <input type="text" value={form.imageUrl} onChange={(e) => setForm({ ...form, imageUrl: e.target.value })} placeholder="https://..." className={inputCls} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">Company Icon URL</label>
+                <input type="text" value={form.iconPath} onChange={(e) => setForm({ ...form, iconPath: e.target.value })} placeholder="https://..." className={inputCls} />
+              </div>
+            </div>
+            <div className="flex gap-3 pt-2">
+              <button onClick={() => setModalOpen(false)} className="flex-1 py-2 border border-border rounded-lg text-sm text-foreground hover:bg-accent transition-colors">Cancel</button>
+              <button onClick={handleSave} disabled={saving} className="flex-1 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:opacity-90 flex items-center justify-center gap-2 disabled:opacity-60">
+                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                {editing ? 'Update' : 'Add'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete confirm */}
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/50" onClick={() => setDeleteTarget(null)} />
+          <div className="relative bg-card border border-border rounded-2xl shadow-xl w-full max-w-sm p-6 text-center space-y-4">
+            <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center mx-auto"><Trash2 className="w-6 h-6 text-red-500" /></div>
+            <div>
+              <h3 className="text-foreground font-medium">Delete "{deleteTarget.title}"?</h3>
+              <p className="text-sm text-muted-foreground mt-1">This cannot be undone.</p>
+            </div>
+            <div className="flex gap-3">
+              <button onClick={() => setDeleteTarget(null)} className="flex-1 py-2 border border-border rounded-lg text-sm text-foreground hover:bg-accent transition-colors">Cancel</button>
+              <button onClick={() => handleDelete(deleteTarget)} className="flex-1 py-2 bg-destructive text-destructive-foreground rounded-lg text-sm font-medium hover:opacity-90 transition-opacity">Delete</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
