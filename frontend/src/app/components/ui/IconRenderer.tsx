@@ -30,7 +30,8 @@ export const IconRenderer: React.FC<IconRendererProps> = ({ icon, className, siz
   // 2. Handle HTML/SVG
   if (icon.startsWith('<')) {
     // If it's a React-style component string like <IoLogoReact /> or <IoLogoReact>
-    const match = icon.match(/<(\w+)\b[^>]*\/?>/);
+    // We only match names starting with Uppercase (React component convention)
+    const match = icon.match(/<([A-Z]\w+)\b[^>]*\/?>/);
     if (match) {
       const iconName = match[1];
       return renderReactIcon(iconName, className, size);

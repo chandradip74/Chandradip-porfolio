@@ -163,7 +163,7 @@ export default function Achievement() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {achievements.map((cert, index) => {
                 const tagColor = TAG_COLORS[cert.certificateTag] || 'bg-accent text-accent-foreground';
-                const certImage = cert.imageUrl || cert.certificateImage;
+                const certImage = cert.certificateImage || cert.imageUrl;
 
                 return (
                   <motion.div

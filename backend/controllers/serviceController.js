@@ -10,16 +10,20 @@ export const getServices = asyncHandler(async (req, res) => {
 export const createService = asyncHandler(async (req, res) => {
   const { title, description, tags } = req.body;
   
-  let iconUrl = '';
+  let imageUrl = '';
   if (req.file) {
-    iconUrl = await uploadToCloudinary(req.file.buffer, 'services');
+    imageUrl = await uploadToCloudinary(req.file.buffer, 'services', 'auto', {
+      name: req.file.originalname,
+      size: req.file.size,
+      format: req.file.mimetype
+    });
   }
 
   const service = new Service({
     title,
     description,
-    icon: iconUrl || req.body.icon,
     tags: tags ? (Array.isArray(tags) ? tags : JSON.parse(tags)) : [],
+    image: imageUrl || req.body.image || '',
   });
 
   const createdService = await service.save();
@@ -27,24 +31,27 @@ export const createService = asyncHandler(async (req, res) => {
 });
 
 export const updateService = asyncHandler(async (req, res) => {
-  const { title, description, tags } = req.body;
   const service = await Service.findById(req.params.id);
-
   if (service) {
+    const { title, description, tags } = req.body;
     service.title = title || service.title;
     service.description = description || service.description;
     if (tags) {
       service.tags = Array.isArray(tags) ? tags : JSON.parse(tags);
     }
-
+    
     if (req.file) {
-      service.icon = await uploadToCloudinary(req.file.buffer, 'services');
-    } else if (req.body.icon) {
-      service.icon = req.body.icon;
+      service.image = await uploadToCloudinary(req.file.buffer, 'services', 'auto', {
+        name: req.file.originalname,
+        size: req.file.size,
+        format: req.file.mimetype
+      });
+    } else if (req.body.image) {
+      service.image = req.body.image;
     }
 
-    const updatedService = await service.save();
-    res.json(updatedService);
+    const updated = await service.save();
+    res.json(updated);
   } else {
     res.status(404);
     throw new Error('Service not found');
@@ -53,7 +60,6 @@ export const updateService = asyncHandler(async (req, res) => {
 
 export const deleteService = asyncHandler(async (req, res) => {
   const service = await Service.findById(req.params.id);
-
   if (service) {
     await service.deleteOne();
     res.json({ message: 'Service removed' });

@@ -12,7 +12,11 @@ export const createProject = asyncHandler(async (req, res) => {
   
   let imageUrl = '';
   if (req.file) {
-    imageUrl = await uploadToCloudinary(req.file.buffer, 'projects');
+    imageUrl = await uploadToCloudinary(req.file.buffer, 'projects', 'auto', {
+      name: req.file.originalname,
+      size: req.file.size,
+      format: req.file.mimetype
+    });
   }
 
   const project = new Project({
@@ -40,7 +44,11 @@ export const updateProject = asyncHandler(async (req, res) => {
     }
 
     if (req.file) {
-      project.image = await uploadToCloudinary(req.file.buffer, 'projects');
+      project.image = await uploadToCloudinary(req.file.buffer, 'projects', 'auto', {
+        name: req.file.originalname,
+        size: req.file.size,
+        format: req.file.mimetype
+      });
     } else if (req.body.image) {
       project.image = req.body.image;
     }

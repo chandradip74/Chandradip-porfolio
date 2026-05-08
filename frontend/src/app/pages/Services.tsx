@@ -76,9 +76,19 @@ export default function Services() {
                     key={service._id || service.title}
                     className="group relative p-8 rounded-3xl bg-card border border-border shadow-sm hover:shadow-xl hover:border-primary/50 transition-all duration-300 cursor-default"
                   >
-                    {/* Icon */}
-                    <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-6 bg-primary/10 text-primary group-hover:scale-110 transition-transform duration-300 overflow-hidden">
-                      <IconRenderer icon={service.icon} size={28} />
+                    {/* Image */}
+                    <div className="w-full h-48 rounded-2xl mb-6 overflow-hidden bg-muted">
+                      {service.image ? (
+                        <img 
+                          src={service.image} 
+                          alt={service.title} 
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <Code2 className="w-12 h-12 text-muted-foreground/30" />
+                        </div>
+                      )}
                     </div>
 
                     <h3 className="text-2xl font-semibold mb-4 text-foreground group-hover:text-primary transition-colors">

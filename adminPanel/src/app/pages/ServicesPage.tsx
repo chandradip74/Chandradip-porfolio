@@ -1,15 +1,14 @@
-import { useState, useEffect } from 'react';
-import { Plus, Pencil, Trash2, X, Save, Tag, Loader2 } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Plus, Pencil, Trash2, X, Save, Tag, Loader2, ImageIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import { api } from '../lib/api';
-import { IconRenderer } from '../components/ui/IconRenderer';
 
 
 interface Service {
   _id: string;
   title: string;
   description: string;
-  icon: string;
+  image: string;
   tags: string[];
 }
 
@@ -21,7 +20,10 @@ export function ServicesPage() {
   const [deleteTarget, setDeleteTarget] = useState<Service | null>(null);
   const [saving, setSaving] = useState(false);
   const [tagInput, setTagInput] = useState('');
-  const [form, setForm] = useState({ title: '', description: '', icon: '🔧', tags: [] as string[] });
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
+
+  const [form, setForm] = useState({ title: '', description: '', image: '', tags: [] as string[] });
 
   const fetchServices = () => {
     setLoading(true);
@@ -35,15 +37,17 @@ export function ServicesPage() {
 
   const openAdd = () => {
     setEditing(null);
-    setForm({ title: '', description: '', icon: '🔧', tags: [] });
+    setForm({ title: '', description: '', image: '', tags: [] });
     setTagInput('');
+    setImageFile(null);
     setModalOpen(true);
   };
 
   const openEdit = (s: Service) => {
     setEditing(s);
-    setForm({ title: s.title, description: s.description, icon: s.icon || '🔧', tags: [...(s.tags || [])] });
+    setForm({ title: s.title, description: s.description, image: s.image || '', tags: [...(s.tags || [])] });
     setTagInput('');
+    setImageFile(null);
     setModalOpen(true);
   };
 
@@ -61,13 +65,25 @@ export function ServicesPage() {
     if (!form.title.trim()) { toast.error('Title is required'); return; }
     if (!form.description.trim()) { toast.error('Description is required'); return; }
     setSaving(true);
+    
     try {
+      const formData = new FormData();
+      formData.append('title', form.title);
+      formData.append('description', form.description);
+      formData.append('tags', JSON.stringify(form.tags));
+      
+      if (imageFile) {
+        formData.append('image', imageFile);
+      } else if (form.image) {
+        formData.append('image', form.image);
+      }
+
       if (editing) {
-        const updated = await api.put(`/services/${editing._id}`, form);
+        const updated = await api.putForm(`/services/${editing._id}`, formData);
         setServices(services.map((s) => s._id === editing._id ? updated : s));
         toast.success('Service updated!');
       } else {
-        const created = await api.post('/services', form);
+        const created = await api.postForm('/services', formData);
         setServices([...services, created]);
         toast.success('Service created!');
       }
@@ -107,33 +123,39 @@ export function ServicesPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
           {services.map((service) => (
-            <div key={service._id} className="bg-card border border-border rounded-xl p-6 hover:shadow-sm transition-all group flex flex-col gap-4">
-              <div className="flex items-start justify-between">
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-primary/10 text-primary mb-2 overflow-hidden flex-shrink-0">
-                  <IconRenderer icon={service.icon} size={28} />
+            <div key={service._id} className="bg-card border border-border rounded-xl overflow-hidden hover:shadow-sm transition-all group flex flex-col">
+              {service.image ? (
+                <div className="h-40 bg-muted overflow-hidden">
+                  <img src={service.image} alt={service.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                 </div>
-                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button onClick={() => openEdit(service)} className="w-8 h-8 rounded-md hover:bg-accent flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors">
-                    <Pencil className="w-3.5 h-3.5" />
-                  </button>
-                  <button onClick={() => setDeleteTarget(service)} className="w-8 h-8 rounded-md hover:bg-red-500/10 flex items-center justify-center text-muted-foreground hover:text-red-500 transition-colors">
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              </div>
-              <div className="flex-1">
-                <h3 className="text-foreground font-medium mb-2">{service.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{service.description}</p>
-              </div>
-              {service.tags?.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {service.tags.map((tag) => (
-                    <span key={tag} className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-accent text-accent-foreground rounded-full text-xs font-medium">
-                      <Tag className="w-2.5 h-2.5" />{tag}
-                    </span>
-                  ))}
+              ) : (
+                <div className="h-40 bg-muted flex items-center justify-center">
+                  <ImageIcon className="w-10 h-10 text-muted-foreground/40" />
                 </div>
               )}
+              <div className="p-6 flex flex-col gap-4 flex-1">
+                <div className="flex items-start justify-between">
+                  <h3 className="text-foreground font-medium flex-1">{service.title}</h3>
+                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity ml-2">
+                    <button onClick={() => openEdit(service)} className="w-8 h-8 rounded-md hover:bg-accent flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors">
+                      <Pencil className="w-3.5 h-3.5" />
+                    </button>
+                    <button onClick={() => setDeleteTarget(service)} className="w-8 h-8 rounded-md hover:bg-red-500/10 flex items-center justify-center text-muted-foreground hover:text-red-500 transition-colors">
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3">{service.description}</p>
+                {service.tags?.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-auto">
+                    {service.tags.map((tag) => (
+                      <span key={tag} className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-accent text-accent-foreground rounded-full text-xs font-medium">
+                        <Tag className="w-2.5 h-2.5" />{tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           ))}
           {services.length === 0 && (
@@ -154,19 +176,29 @@ export function ServicesPage() {
               <button onClick={() => setModalOpen(false)} className="w-8 h-8 rounded-lg hover:bg-accent flex items-center justify-center text-muted-foreground"><X className="w-4 h-4" /></button>
             </div>
             <div className="space-y-3">
-              <div className="grid grid-cols-4 gap-3">
-                <div className="col-span-4">
-                  <label className="block text-sm font-medium text-foreground mb-1">Icon <span className="text-xs font-normal text-muted-foreground">(Emoji, FontAwesome HTML, Image URL)</span></label>
-                  <input type="text" value={form.icon} onChange={(e) => setForm({ ...form, icon: e.target.value })} placeholder="🔧 or <i class='fa-solid fa-code'></i>" className="w-full px-3 py-2 text-sm bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-foreground placeholder:text-muted-foreground" />
-                </div>
-                <div className="col-span-4">
-                  <label className="block text-sm font-medium text-foreground mb-1">Title</label>
-                  <input type="text" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Service title" className="w-full px-3 py-2 text-sm bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-foreground placeholder:text-muted-foreground" />
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">Title</label>
+                <input type="text" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Service title" className="w-full px-3 py-2 text-sm bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-foreground placeholder:text-muted-foreground" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1">Description</label>
                 <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} placeholder="Describe the service..." className="w-full px-3 py-2 text-sm bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-foreground resize-none placeholder:text-muted-foreground" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">Service Image</label>
+                {(imageFile || form.image) && (
+                  <div className="mb-2 relative">
+                    <img src={imageFile ? URL.createObjectURL(imageFile) : form.image} alt="Preview" className="w-full h-40 object-cover rounded-lg border border-border" />
+                    <button onClick={() => { setImageFile(null); setForm({ ...form, image: '' }); }} className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-black/70 transition-colors"><X className="w-4 h-4" /></button>
+                  </div>
+                )}
+                <div className="flex gap-2">
+                  <button type="button" onClick={() => imageInputRef.current?.click()} className="flex items-center gap-2 px-3 py-2 border border-border rounded-lg text-sm text-foreground hover:bg-accent transition-colors">
+                    Upload Image
+                  </button>
+                  <input type="text" value={form.image} onChange={(e) => { setForm({ ...form, image: e.target.value }); setImageFile(null); }} placeholder="Or paste image URL..." className="flex-1 px-3 py-2 text-sm bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-foreground placeholder:text-muted-foreground" />
+                </div>
+                <input ref={imageInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && setImageFile(e.target.files[0])} />
               </div>
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1">Tags</label>
@@ -198,10 +230,10 @@ export function ServicesPage() {
       {deleteTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/50" onClick={() => setDeleteTarget(null)} />
-          <div className="relative bg-card border border-border rounded-2xl shadow-xl w-full max-w-sm p-6 text-center space-y-4">
+          <div className="relative bg-card border border-border rounded-2xl shadow-xl w-full max-sm p-6 text-center space-y-4">
             <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center mx-auto"><Trash2 className="w-6 h-6 text-red-500" /></div>
             <div>
-              <h3 className="text-foreground font-medium">Delete "{deleteTarget.title}"?</h3>
+              <h3 className="text-foreground font-medium">Delete \"{deleteTarget.title}\"?</h3>
               <p className="text-sm text-muted-foreground mt-1">This cannot be undone.</p>
             </div>
             <div className="flex gap-3">

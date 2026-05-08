@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Plus, Pencil, Trash2, X, Save, Loader2, Trophy } from 'lucide-react';
 import { toast } from 'sonner';
 import { api } from '../lib/api';
+import { IconRenderer } from '../components/ui/IconRenderer';
 
 interface Achievement {
   _id: string;
@@ -136,9 +137,9 @@ export function AchievementsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {achievements.map((ach) => (
             <div key={ach._id} className="bg-card border border-border rounded-xl overflow-hidden hover:shadow-sm transition-all group">
-              {ach.imageUrl || ach.certificateImage ? (
+              {ach.certificateImage || ach.imageUrl ? (
                 <div className="h-36 bg-muted overflow-hidden">
-                  <img src={ach.imageUrl || ach.certificateImage} alt={ach.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  <img src={ach.certificateImage || ach.imageUrl} alt={ach.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                 </div>
               ) : (
                 <div className="h-2 w-full bg-primary" />
@@ -146,13 +147,9 @@ export function AchievementsPage() {
               <div className="p-5 flex flex-col gap-3">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-2">
-                    {ach.iconPath ? (
-                      <img src={ach.iconPath} className="w-8 h-8 object-contain" alt="" />
-                    ) : (
-                      <div className="w-8 h-8 rounded-lg bg-yellow-500/10 flex items-center justify-center">
-                        <Trophy className="w-4 h-4 text-yellow-500" />
-                      </div>
-                    )}
+                    <div className="w-8 h-8 rounded-lg bg-yellow-500/10 flex items-center justify-center overflow-hidden text-yellow-500">
+                      <IconRenderer icon={ach.iconPath} size={20} />
+                    </div>
                     {ach.certificateTag && (
                       <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${TAG_COLORS[ach.certificateTag] || 'bg-accent text-accent-foreground'}`}>
                         {ach.certificateTag}
@@ -220,10 +217,12 @@ export function AchievementsPage() {
                 <input ref={certInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && setCertFile(e.target.files[0])} />
               </div>
               <div>
-                <label className="block text-sm font-medium text-foreground mb-1">Company Icon</label>
+                <label className="block text-sm font-medium text-foreground mb-1">Company Icon <span className="text-xs font-normal text-muted-foreground">(Emoji, Icon Name, or Image URL)</span></label>
                 {(iconFile || form.iconPath) && (
                   <div className="mb-2 relative">
-                    <img src={iconFile ? URL.createObjectURL(iconFile) : form.iconPath} alt="Preview" className="w-16 h-16 object-contain rounded-lg border border-border bg-muted p-1" />
+                    <div className="w-16 h-16 flex items-center justify-center rounded-lg border border-border bg-muted p-1 overflow-hidden">
+                      {iconFile ? <img src={URL.createObjectURL(iconFile)} alt="Preview" className="w-full h-full object-contain" /> : <IconRenderer icon={form.iconPath} size={32} />}
+                    </div>
                     <button onClick={() => { setIconFile(null); setForm({ ...form, iconPath: '' }); }} className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-black/70 transition-colors"><X className="w-3 h-3" /></button>
                   </div>
                 )}

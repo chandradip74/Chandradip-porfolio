@@ -20,17 +20,15 @@ export const createResource = asyncHandler(async (req, res) => {
     resourceType = 'raw';
   }
 
-  const url = await uploadToCloudinary(req.file.buffer, 'resources', resourceType);
-  
-  const resource = new Resource({
+  // uploadToCloudinary will now handle saving the Resource record when metadata is provided
+  const url = await uploadToCloudinary(req.file.buffer, 'resources', resourceType, {
     name: originalname,
-    url,
-    resourceType,
-    format: mimetype,
-    size,
+    size: size,
+    format: mimetype
   });
-
-  const createdResource = await resource.save();
+  
+  // Find the newly created resource to return it
+  const createdResource = await Resource.findOne({ url });
   res.status(201).json(createdResource);
 });
 

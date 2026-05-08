@@ -38,10 +38,20 @@ export const updateProfile = asyncHandler(async (req, res) => {
 
   if (req.files) {
     if (req.files.profileImage) {
-      profile.profileImage = await uploadToCloudinary(req.files.profileImage[0].buffer, 'profile');
+      const file = req.files.profileImage[0];
+      profile.profileImage = await uploadToCloudinary(file.buffer, 'profile', 'auto', {
+        name: file.originalname,
+        size: file.size,
+        format: file.mimetype
+      });
     }
     if (req.files.cvFile) {
-      profile.cvFile = await uploadToCloudinary(req.files.cvFile[0].buffer, 'profile', 'raw');
+      const file = req.files.cvFile[0];
+      profile.cvFile = await uploadToCloudinary(file.buffer, 'profile', 'raw', {
+        name: file.originalname,
+        size: file.size,
+        format: file.mimetype
+      });
     }
   }
 

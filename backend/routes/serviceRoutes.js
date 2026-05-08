@@ -6,10 +6,10 @@ const router = express.Router();
 
 router.route('/')
   .get(getServices)
-  .post(upload.single('icon'), createService);
+  .post(upload.single('image'), createService);
 
 router.route('/:id')
-  .put(upload.single('icon'), updateService)
+  .put(upload.single('image'), updateService)
   .delete(deleteService);
 
 export default router;

@@ -15,10 +15,20 @@ export const createAchievement = asyncHandler(async (req, res) => {
 
   if (req.files) {
     if (req.files.certificateImage) {
-      certificateImageUrl = await uploadToCloudinary(req.files.certificateImage[0].buffer, 'achievements');
+      const file = req.files.certificateImage[0];
+      certificateImageUrl = await uploadToCloudinary(file.buffer, 'achievements', 'auto', {
+        name: file.originalname,
+        size: file.size,
+        format: file.mimetype
+      });
     }
     if (req.files.iconPath) {
-      uploadedIconPath = await uploadToCloudinary(req.files.iconPath[0].buffer, 'achievements');
+      const file = req.files.iconPath[0];
+      uploadedIconPath = await uploadToCloudinary(file.buffer, 'achievements', 'auto', {
+        name: file.originalname,
+        size: file.size,
+        format: file.mimetype
+      });
     }
   }
 
@@ -49,10 +59,20 @@ export const updateAchievement = asyncHandler(async (req, res) => {
     
     if (req.files) {
       if (req.files.certificateImage) {
-        achievement.certificateImage = await uploadToCloudinary(req.files.certificateImage[0].buffer, 'achievements');
+        const file = req.files.certificateImage[0];
+        achievement.certificateImage = await uploadToCloudinary(file.buffer, 'achievements', 'auto', {
+          name: file.originalname,
+          size: file.size,
+          format: file.mimetype
+        });
       }
       if (req.files.iconPath) {
-        achievement.iconPath = await uploadToCloudinary(req.files.iconPath[0].buffer, 'achievements');
+        const file = req.files.iconPath[0];
+        achievement.iconPath = await uploadToCloudinary(file.buffer, 'achievements', 'auto', {
+          name: file.originalname,
+          size: file.size,
+          format: file.mimetype
+        });
       }
     }
     const updated = await achievement.save();
