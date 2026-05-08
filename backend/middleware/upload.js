@@ -19,10 +19,10 @@ export const upload = multer({
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
 });
 
-export const uploadToCloudinary = (buffer, folder) => {
+export const uploadToCloudinary = (buffer, folder, resourceType = 'auto') => {
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
-      { folder: `portfolio/${folder}`, resource_type: 'auto' },
+      { folder: `portfolio/${folder}`, resource_type: resourceType },
       (error, result) => {
         if (result) {
           resolve(result.secure_url);

@@ -18,6 +18,21 @@ export const createTechnology = asyncHandler(async (req, res) => {
   res.status(201).json(createdTechnology);
 });
 
+export const updateTechnology = asyncHandler(async (req, res) => {
+  const technology = await Technology.findById(req.params.id);
+
+  if (technology) {
+    const { technologyName, iconPath } = req.body;
+    technology.technologyName = technologyName || technology.technologyName;
+    technology.iconPath = iconPath !== undefined ? iconPath : technology.iconPath;
+    const updated = await technology.save();
+    res.json(updated);
+  } else {
+    res.status(404);
+    throw new Error('Technology not found');
+  }
+});
+
 export const deleteTechnology = asyncHandler(async (req, res) => {
   const technology = await Technology.findById(req.params.id);
 

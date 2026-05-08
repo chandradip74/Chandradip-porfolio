@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { Plus, Search, Pencil, Trash2, X, Save, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { api } from '../lib/api';
+import { IconRenderer } from '../components/ui/IconRenderer';
+
 
 interface Technology {
   _id: string;
@@ -110,11 +112,7 @@ export function TechnologiesPage() {
             <div key={tech._id} className="bg-card border border-border rounded-xl p-4 hover:shadow-sm transition-all group">
               <div className="flex items-start justify-between mb-3">
                 <div className="w-10 h-10 rounded-lg bg-accent flex items-center justify-center overflow-hidden flex-shrink-0">
-                  {tech.iconPath ? (
-                    <img src={tech.iconPath} alt="" className="w-7 h-7 object-contain" />
-                  ) : (
-                    <span className="text-xl">{tech.technologyName[0]}</span>
-                  )}
+                  <IconRenderer icon={tech.iconPath} size={28} />
                 </div>
                 <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button onClick={() => openEdit(tech)} className="w-7 h-7 rounded-md hover:bg-accent flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors">
@@ -160,19 +158,21 @@ export function TechnologiesPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-foreground mb-1">Icon URL <span className="text-xs font-normal text-muted-foreground">(CDN/Cloudinary image link)</span></label>
+                <label className="block text-sm font-medium text-foreground mb-1">Icon <span className="text-xs font-normal text-muted-foreground">(FontAwesome HTML, React Icon name, or Image URL)</span></label>
                 <input
                   type="text"
                   value={form.iconPath}
                   onChange={(e) => setForm({ ...form, iconPath: e.target.value })}
-                  placeholder="https://cdn.example.com/react-icon.svg"
+                  placeholder='<i class="fa-brands fa-react"></i> or https://...'
                   className="w-full px-3 py-2 text-sm bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-foreground placeholder:text-muted-foreground"
                 />
               </div>
               {form.iconPath && (
-                <div className="flex items-center gap-3 p-3 bg-accent rounded-lg">
-                  <img src={form.iconPath} alt="" className="w-8 h-8 object-contain" onError={(e) => (e.currentTarget.style.display = 'none')} />
-                  <span className="text-xs text-muted-foreground">Icon preview</span>
+                <div className="flex flex-col items-center gap-3 p-3 bg-accent rounded-lg border border-border/50">
+                  <div className="w-12 h-12 rounded-lg bg-background flex items-center justify-center shadow-sm">
+                    <IconRenderer icon={form.iconPath} size={32} />
+                  </div>
+                  <span className="text-xs text-muted-foreground font-medium">Icon preview</span>
                 </div>
               )}
             </div>

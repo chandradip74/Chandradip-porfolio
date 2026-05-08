@@ -2,7 +2,7 @@ import { NavLink, useNavigate } from 'react-router';
 import {
   LayoutDashboard, User, Cpu, Briefcase, FolderOpen,
   GitBranch, Trophy, ImageIcon, MessageSquare, Settings,
-  LogOut, ChevronLeft, ChevronRight, Zap, Sun, Moon,
+  LogOut, ChevronLeft, ChevronRight, Zap, Sun, Moon, Palette
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useSidebar } from '../context/SidebarContext';
@@ -19,6 +19,7 @@ const navItems = [
   { label: 'Achievements', icon: Trophy, path: '/achievements' },
   { label: 'Media Library', icon: ImageIcon, path: '/media' },
   { label: 'Messages', icon: MessageSquare, path: '/messages' },
+  { label: 'Interests', icon: Palette, path: '/interests' },
   { label: 'Settings', icon: Settings, path: '/settings' },
 ];
 
@@ -113,18 +114,18 @@ export function Sidebar() {
         {!collapsed && user && (
           <div className="flex items-center gap-3 px-3 py-2 mt-1 rounded-md bg-sidebar-accent/40">
             <div className="w-8 h-8 rounded-full bg-sidebar-primary flex items-center justify-center flex-shrink-0">
-              <span className="text-xs text-sidebar-primary-foreground font-medium">{user.initials}</span>
+              <span className="text-xs text-sidebar-primary-foreground font-medium">{user.username.substring(0, 2).toUpperCase()}</span>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs text-sidebar-foreground truncate font-medium">{user.name}</p>
-              <p className="text-xs text-sidebar-foreground/60 truncate">{user.role}</p>
+              <p className="text-xs text-sidebar-foreground truncate font-medium">{user.username}</p>
+              <p className="text-xs text-sidebar-foreground/60 truncate">Admin</p>
             </div>
           </div>
         )}
         {collapsed && user && (
           <div className="flex justify-center px-3 py-2">
             <div className="w-8 h-8 rounded-full bg-sidebar-primary flex items-center justify-center">
-              <span className="text-xs text-sidebar-primary-foreground font-medium">{user.initials}</span>
+              <span className="text-xs text-sidebar-primary-foreground font-medium">{user.username.substring(0, 2).toUpperCase()}</span>
             </div>
           </div>
         )}
@@ -188,11 +189,11 @@ export function Sidebar() {
               {user && (
                 <div className="flex items-center gap-3 px-3 py-2 mt-1 rounded-md bg-sidebar-accent/40">
                   <div className="w-8 h-8 rounded-full bg-sidebar-primary flex items-center justify-center">
-                    <span className="text-xs text-sidebar-primary-foreground font-medium">{user.initials}</span>
+                    <span className="text-xs text-sidebar-primary-foreground font-medium">{user.username.substring(0, 2).toUpperCase()}</span>
                   </div>
                   <div>
-                    <p className="text-xs text-sidebar-foreground font-medium">{user.name}</p>
-                    <p className="text-xs text-sidebar-foreground/60">{user.role}</p>
+                    <p className="text-xs text-sidebar-foreground font-medium">{user.username}</p>
+                    <p className="text-xs text-sidebar-foreground/60">Admin</p>
                   </div>
                 </div>
               )}

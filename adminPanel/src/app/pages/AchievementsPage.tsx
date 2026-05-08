@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Plus, Pencil, Trash2, X, Save, Loader2, Trophy } from 'lucide-react';
 import { toast } from 'sonner';
 import { api } from '../lib/api';
@@ -30,8 +30,13 @@ export function AchievementsPage() {
   const [editing, setEditing] = useState<Achievement | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Achievement | null>(null);
   const [saving, setSaving] = useState(false);
+  const [certFile, setCertFile] = useState<File | null>(null);
+  const [iconFile, setIconFile] = useState<File | null>(null);
+  const certInputRef = useRef<HTMLInputElement>(null);
+  const iconInputRef = useRef<HTMLInputElement>(null);
+
   const [form, setForm] = useState({
-    title: '', description: '', imageUrl: '', certificateTag: '', companyName: '', iconPath: '',
+    title: '', description: '', imageUrl: '', certificateImage: '', certificateTag: '', companyName: '', iconPath: '',
   });
 
   const fetchAchievements = () => {
@@ -46,13 +51,17 @@ export function AchievementsPage() {
 
   const openAdd = () => {
     setEditing(null);
-    setForm({ title: '', description: '', imageUrl: '', certificateTag: '', companyName: '', iconPath: '' });
+    setForm({ title: '', description: '', imageUrl: '', certificateImage: '', certificateTag: '', companyName: '', iconPath: '' });
+    setCertFile(null);
+    setIconFile(null);
     setModalOpen(true);
   };
 
   const openEdit = (a: Achievement) => {
     setEditing(a);
-    setForm({ title: a.title, description: a.description, imageUrl: a.imageUrl || '', certificateTag: a.certificateTag || '', companyName: a.companyName || '', iconPath: a.iconPath || '' });
+    setForm({ title: a.title, description: a.description, imageUrl: a.imageUrl || '', certificateImage: a.certificateImage || '', certificateTag: a.certificateTag || '', companyName: a.companyName || '', iconPath: a.iconPath || '' });
+    setCertFile(null);
+    setIconFile(null);
     setModalOpen(true);
   };
 
@@ -61,12 +70,25 @@ export function AchievementsPage() {
     if (!form.description.trim()) { toast.error('Description is required'); return; }
     setSaving(true);
     try {
+      const formData = new FormData();
+      formData.append('title', form.title);
+      formData.append('description', form.description);
+      formData.append('certificateTag', form.certificateTag);
+      formData.append('companyName', form.companyName);
+      formData.append('imageUrl', form.imageUrl); // keeping imageUrl if it is used
+      
+      if (certFile) formData.append('certificateImage', certFile);
+      else if (form.certificateImage) formData.append('certificateImage', form.certificateImage);
+
+      if (iconFile) formData.append('iconPath', iconFile);
+      else if (form.iconPath) formData.append('iconPath', form.iconPath);
+
       if (editing) {
-        const updated = await api.put(`/achievements/${editing._id}`, form);
+        const updated = await api.putForm(`/achievements/${editing._id}`, formData);
         setAchievements(achievements.map((a) => a._id === editing._id ? updated : a));
         toast.success('Achievement updated!');
       } else {
-        const created = await api.post('/achievements', form);
+        const created = await api.postForm('/achievements', formData);
         setAchievements([...achievements, created]);
         toast.success('Achievement added!');
       }
@@ -182,12 +204,36 @@ export function AchievementsPage() {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-foreground mb-1">Certificate Image URL</label>
-                <input type="text" value={form.imageUrl} onChange={(e) => setForm({ ...form, imageUrl: e.target.value })} placeholder="https://..." className={inputCls} />
+                <label className="block text-sm font-medium text-foreground mb-1">Certificate Image</label>
+                {(certFile || form.certificateImage || form.imageUrl) && (
+                  <div className="mb-2 relative">
+                    <img src={certFile ? URL.createObjectURL(certFile) : (form.certificateImage || form.imageUrl)} alt="Preview" className="w-full h-32 object-cover rounded-lg border border-border" />
+                    <button onClick={() => { setCertFile(null); setForm({ ...form, certificateImage: '', imageUrl: '' }); }} className="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-black/70 transition-colors"><X className="w-3 h-3" /></button>
+                  </div>
+                )}
+                <div className="flex gap-2">
+                  <button type="button" onClick={() => certInputRef.current?.click()} className="flex items-center gap-2 px-3 py-2 border border-border rounded-lg text-sm text-foreground hover:bg-accent transition-colors">
+                    Upload Image
+                  </button>
+                  <input type="text" value={form.certificateImage || form.imageUrl} onChange={(e) => { setForm({ ...form, certificateImage: e.target.value, imageUrl: e.target.value }); setCertFile(null); }} placeholder="Or paste image URL..." className={inputCls} />
+                </div>
+                <input ref={certInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && setCertFile(e.target.files[0])} />
               </div>
               <div>
-                <label className="block text-sm font-medium text-foreground mb-1">Company Icon URL</label>
-                <input type="text" value={form.iconPath} onChange={(e) => setForm({ ...form, iconPath: e.target.value })} placeholder="https://..." className={inputCls} />
+                <label className="block text-sm font-medium text-foreground mb-1">Company Icon</label>
+                {(iconFile || form.iconPath) && (
+                  <div className="mb-2 relative">
+                    <img src={iconFile ? URL.createObjectURL(iconFile) : form.iconPath} alt="Preview" className="w-16 h-16 object-contain rounded-lg border border-border bg-muted p-1" />
+                    <button onClick={() => { setIconFile(null); setForm({ ...form, iconPath: '' }); }} className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-black/70 transition-colors"><X className="w-3 h-3" /></button>
+                  </div>
+                )}
+                <div className="flex gap-2">
+                  <button type="button" onClick={() => iconInputRef.current?.click()} className="flex items-center gap-2 px-3 py-2 border border-border rounded-lg text-sm text-foreground hover:bg-accent transition-colors">
+                    Upload Icon
+                  </button>
+                  <input type="text" value={form.iconPath} onChange={(e) => { setForm({ ...form, iconPath: e.target.value }); setIconFile(null); }} placeholder="Or paste icon URL..." className={inputCls} />
+                </div>
+                <input ref={iconInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && setIconFile(e.target.files[0])} />
               </div>
             </div>
             <div className="flex gap-3 pt-2">

@@ -7,21 +7,19 @@ import { toast } from 'sonner';
 export function LoginPage() {
   const { isAuthenticated, login } = useAuth();
   const navigate = useNavigate();
-  const [email, setEmail] = useState('admin@portfolio.dev');
+  const [username, setUsername] = useState('admin');
   const [password, setPassword] = useState('admin123');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const [errors, setErrors] = useState<{ username?: string; password?: string }>({});
 
   if (isAuthenticated) return <Navigate to="/" replace />;
 
   const validate = () => {
-    const e: { email?: string; password?: string } = {};
-    if (!email) e.email = 'Email is required';
-    else if (!/\S+@\S+\.\S+/.test(email)) e.email = 'Invalid email address';
+    const e: { username?: string; password?: string } = {};
+    if (!username) e.username = 'Username is required';
     if (!password) e.password = 'Password is required';
-    else if (password.length < 6) e.password = 'Password must be at least 6 characters';
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -30,14 +28,13 @@ export function LoginPage() {
     e.preventDefault();
     if (!validate()) return;
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 800));
-    const success = login(email, password);
+    const success = await login(username, password);
     setLoading(false);
     if (success) {
-      toast.success('Welcome back, Alex!');
+      toast.success('Welcome back!');
       navigate('/');
     } else {
-      toast.error('Invalid credentials. Try admin@portfolio.dev / admin123');
+      toast.error('Invalid credentials.');
     }
   };
 
@@ -112,20 +109,20 @@ export function LoginPage() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Email */}
+            {/* Username */}
             <div>
-              <label className="block text-sm font-medium text-foreground mb-1.5">Email address</label>
+              <label className="block text-sm font-medium text-foreground mb-1.5">Username</label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => { setEmail(e.target.value); setErrors((prev) => ({ ...prev, email: undefined })); }}
-                  placeholder="admin@portfolio.dev"
-                  className={`w-full pl-10 pr-4 py-2.5 text-sm bg-input-background border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-foreground placeholder:text-muted-foreground transition-all ${errors.email ? 'border-destructive' : 'border-border'}`}
+                  type="text"
+                  value={username}
+                  onChange={(e) => { setUsername(e.target.value); setErrors((prev) => ({ ...prev, username: undefined })); }}
+                  placeholder="admin"
+                  className={`w-full pl-10 pr-4 py-2.5 text-sm bg-input-background border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-foreground placeholder:text-muted-foreground transition-all ${errors.username ? 'border-destructive' : 'border-border'}`}
                 />
               </div>
-              {errors.email && <p className="text-xs text-destructive mt-1">{errors.email}</p>}
+              {errors.username && <p className="text-xs text-destructive mt-1">{errors.username}</p>}
             </div>
 
             {/* Password */}

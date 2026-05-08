@@ -10,8 +10,7 @@ export function SettingsPage() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
-  const [name, setName] = useState(user?.name || '');
-  const [email, setEmail] = useState(user?.email || '');
+  const [username, setUsername] = useState(user?.username || '');
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -21,13 +20,32 @@ export function SettingsPage() {
   const [cloudinarySecret, setCloudinarySecret] = useState('••••••••••••••••••••••••');
   const [mongoUri, setMongoUri] = useState('mongodb+srv://user:••••••••@cluster.mongodb.net/portfolio');
 
-  const handleSaveAccount = () => toast.success('Account settings saved!');
-  const handleSavePassword = () => {
-    if (newPassword !== confirmPassword) { toast.error('Passwords do not match'); return; }
-    if (newPassword.length < 8) { toast.error('Password must be at least 8 characters'); return; }
-    toast.success('Password updated successfully!');
-    setCurrentPassword(''); setNewPassword(''); setConfirmPassword('');
+  const handleSaveAccount = async () => {
+    if (!username.trim()) { toast.error('Username is required'); return; }
+    try {
+      await api.put('/auth/profile', { username });
+      user && logout(); // Force re-login if username changes? Or use AuthContext updateUser
+      toast.success('Account settings saved! Please log in again.');
+      navigate('/login');
+    } catch (e: any) {
+      toast.error(e.message || 'Failed to update account');
+    }
   };
+
+  const handleSavePassword = async () => {
+    if (newPassword !== confirmPassword) { toast.error('Passwords do not match'); return; }
+    if (newPassword.length < 6) { toast.error('Password must be at least 6 characters'); return; }
+    try {
+      await api.put('/auth/profile', { password: newPassword });
+      toast.success('Password updated successfully! Please log in again.');
+      setCurrentPassword(''); setNewPassword(''); setConfirmPassword('');
+      logout();
+      navigate('/login');
+    } catch (e: any) {
+      toast.error(e.message || 'Failed to update password');
+    }
+  };
+
   const handleLogout = () => { logout(); toast.success('Logged out'); navigate('/login'); };
 
   const Section = ({ title, description, children }: { title: string; description: string; children: React.ReactNode }) => (
@@ -93,12 +111,8 @@ export function SettingsPage() {
         <div className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-foreground mb-1.5">Full Name</label>
-              <input type="text" value={name} onChange={(e) => setName(e.target.value)} className="w-full px-3 py-2 text-sm bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-foreground" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-1.5">Email Address</label>
-              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full px-3 py-2 text-sm bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-foreground" />
+              <label className="block text-sm font-medium text-foreground mb-1.5">Username</label>
+              <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} className="w-full px-3 py-2 text-sm bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-foreground" />
             </div>
           </div>
           <button onClick={handleSaveAccount} className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:opacity-90 transition-opacity">

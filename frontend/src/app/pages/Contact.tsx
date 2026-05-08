@@ -1,27 +1,7 @@
-import { useState, FormEvent } from "react";
+import { useState, useEffect, FormEvent } from "react";
 import { Send, Mail, MapPin, Phone, CheckCircle2 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
-
-const contactInfo = [
-  {
-    icon: Mail,
-    label: "Email",
-    value: "hello@alexkumar.dev",
-    href: "mailto:hello@alexkumar.dev",
-  },
-  {
-    icon: Phone,
-    label: "Phone",
-    value: "+1 (555) 000-1234",
-    href: "tel:+15550001234",
-  },
-  {
-    icon: MapPin,
-    label: "Location",
-    value: "San Francisco, CA, USA",
-    href: "#",
-  },
-];
+import { api } from "../lib/api";
 
 interface FormData {
   firstName: string;
@@ -32,6 +12,7 @@ interface FormData {
 }
 
 export default function Contact() {
+  const [profile, setProfile] = useState<any>(null);
   const [form, setForm] = useState<FormData>({
     firstName: "",
     lastName: "",
@@ -42,6 +23,32 @@ export default function Contact() {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    api.get('/profile').then(setProfile).catch(() => {});
+  }, []);
+
+  // Build contact info dynamically from profile, fall back to defaults
+  const contactInfo = [
+    {
+      icon: Mail,
+      label: "Email",
+      value: profile?.email || "hello@example.com",
+      href: `mailto:${profile?.email || "hello@example.com"}`,
+    },
+    {
+      icon: Phone,
+      label: "Phone",
+      value: profile?.phone || "+1 (555) 000-1234",
+      href: `tel:${(profile?.phone || "+15550001234").replace(/\s/g, "")}`,
+    },
+    {
+      icon: MapPin,
+      label: "Location",
+      value: profile?.location || "Your City, Country",
+      href: "#",
+    },
+  ];
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -67,19 +74,12 @@ export default function Contact() {
     setLoading(true);
 
     try {
-      const response = await fetch('http://localhost:5000/api/contact', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          firstName: form.firstName,
-          lastName: form.lastName,
-          email: form.email,
-          description: form.subject ? `[${form.subject}] ${form.message}` : form.message
-        })
+      await api.post('/contact', {
+        firstName: form.firstName,
+        lastName: form.lastName,
+        email: form.email,
+        description: form.subject ? `[${form.subject}] ${form.message}` : form.message,
       });
-
-      if (!response.ok) throw new Error('Failed to send message');
-
       setSubmitted(true);
     } catch (err) {
       console.error(err);

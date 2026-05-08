@@ -11,6 +11,8 @@ import { AchievementsPage } from './pages/AchievementsPage';
 import { MediaLibraryPage } from './pages/MediaLibraryPage';
 import { MessagesPage } from './pages/MessagesPage';
 import { SettingsPage } from './pages/SettingsPage';
+import { InterestsPage } from './pages/InterestsPage';
+
 
 export const router = createBrowserRouter([
   { path: '/login', Component: LoginPage },
@@ -27,7 +29,9 @@ export const router = createBrowserRouter([
       { path: 'achievements', Component: AchievementsPage },
       { path: 'media', Component: MediaLibraryPage },
       { path: 'messages', Component: MessagesPage },
+      { path: 'interests', Component: InterestsPage },
       { path: 'settings', Component: SettingsPage },
+
     ],
   },
   { path: '*', Component: () => <Navigate to="/" replace /> },

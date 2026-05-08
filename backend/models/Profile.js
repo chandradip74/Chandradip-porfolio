@@ -7,6 +7,9 @@ const profileSchema = new mongoose.Schema({
   aboutMe: { type: String },
   profileImage: { type: String },
   cvFile: { type: String },
+  email: { type: String },
+  phone: { type: String },
+  location: { type: String },
 }, { timestamps: true });
 
 export default mongoose.model('Profile', profileSchema);

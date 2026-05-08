@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { NavLink, useLocation } from "react-router";
-import { Menu, X, Sun, Moon } from "lucide-react";
+import { Sun, Moon, Menu, X } from "lucide-react";
 import { useTheme } from "next-themes";
+import { api } from "../lib/api";
 
 const navItems = [
   { label: "Home", to: "/" },
@@ -14,8 +15,23 @@ const navItems = [
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [profile, setProfile] = useState<any>(null);
   const location = useLocation();
   const { theme, setTheme } = useTheme();
+
+  useEffect(() => {
+    api.get('/profile')
+      .then(data => setProfile(data))
+      .catch(err => console.error('Failed to fetch profile in navbar:', err));
+  }, []);
+
+  const getInitials = (name: string) => {
+    if (!name) return "AK";
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+  };
+
+  const displayName = profile?.name || "Alex Kumar";
+  const displayInitials = getInitials(displayName);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -37,10 +53,10 @@ export default function Navbar() {
         {/* Logo */}
         <NavLink to="/" className="flex items-center gap-2 group">
           <div className="w-10 h-10 rounded-lg flex items-center justify-center transition-transform duration-300 group-hover:scale-110 bg-primary text-primary-foreground">
-            <span className="text-sm font-bold tracking-tight">AK</span>
+            <span className="text-sm font-bold tracking-tight">{displayInitials}</span>
           </div>
           <span className="text-lg font-semibold tracking-tight hidden sm:block text-foreground">
-            Alex Kumar
+            {displayName}
           </span>
         </NavLink>
 

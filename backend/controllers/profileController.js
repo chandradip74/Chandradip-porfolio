@@ -24,21 +24,24 @@ export const updateProfile = asyncHandler(async (req, res) => {
     profile = new Profile();
   }
 
-  const { name, role, description, aboutMe } = req.body;
+  const { name, role, description, aboutMe, email, phone, location } = req.body;
   
   profile.name = name || profile.name;
   if (role) {
     profile.role = Array.isArray(role) ? role : JSON.parse(role);
   }
   profile.description = description || profile.description;
-  profile.aboutMe = aboutMe || profile.aboutMe;
+  if (aboutMe !== undefined) profile.aboutMe = aboutMe;
+  if (email !== undefined) profile.email = email;
+  if (phone !== undefined) profile.phone = phone;
+  if (location !== undefined) profile.location = location;
 
   if (req.files) {
     if (req.files.profileImage) {
       profile.profileImage = await uploadToCloudinary(req.files.profileImage[0].buffer, 'profile');
     }
     if (req.files.cvFile) {
-      profile.cvFile = await uploadToCloudinary(req.files.cvFile[0].buffer, 'profile');
+      profile.cvFile = await uploadToCloudinary(req.files.cvFile[0].buffer, 'profile', 'raw');
     }
   }
 

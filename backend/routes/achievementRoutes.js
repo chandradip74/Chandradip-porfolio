@@ -6,10 +6,10 @@ const router = express.Router();
 
 router.route('/')
   .get(getAchievements)
-  .post(upload.single('certificateImage'), createAchievement);
+  .post(upload.fields([{ name: 'certificateImage', maxCount: 1 }, { name: 'iconPath', maxCount: 1 }]), createAchievement);
 
 router.route('/:id')
-  .put(upload.single('certificateImage'), updateAchievement)
+  .put(upload.fields([{ name: 'certificateImage', maxCount: 1 }, { name: 'iconPath', maxCount: 1 }]), updateAchievement)
   .delete(deleteAchievement);
 
 export default router;

@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { Plus, Pencil, Trash2, X, Save, Tag, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { api } from '../lib/api';
+import { IconRenderer } from '../components/ui/IconRenderer';
+
 
 interface Service {
   _id: string;
@@ -107,7 +109,9 @@ export function ServicesPage() {
           {services.map((service) => (
             <div key={service._id} className="bg-card border border-border rounded-xl p-6 hover:shadow-sm transition-all group flex flex-col gap-4">
               <div className="flex items-start justify-between">
-                <div className="text-4xl">{service.icon}</div>
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-primary/10 text-primary mb-2 overflow-hidden flex-shrink-0">
+                  <IconRenderer icon={service.icon} size={28} />
+                </div>
                 <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button onClick={() => openEdit(service)} className="w-8 h-8 rounded-md hover:bg-accent flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors">
                     <Pencil className="w-3.5 h-3.5" />
@@ -151,11 +155,11 @@ export function ServicesPage() {
             </div>
             <div className="space-y-3">
               <div className="grid grid-cols-4 gap-3">
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">Icon</label>
-                  <input type="text" value={form.icon} onChange={(e) => setForm({ ...form, icon: e.target.value })} className="w-full px-3 py-2 text-sm bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-foreground text-center text-xl" />
+                <div className="col-span-4">
+                  <label className="block text-sm font-medium text-foreground mb-1">Icon <span className="text-xs font-normal text-muted-foreground">(Emoji, FontAwesome HTML, Image URL)</span></label>
+                  <input type="text" value={form.icon} onChange={(e) => setForm({ ...form, icon: e.target.value })} placeholder="🔧 or <i class='fa-solid fa-code'></i>" className="w-full px-3 py-2 text-sm bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-foreground placeholder:text-muted-foreground" />
                 </div>
-                <div className="col-span-3">
+                <div className="col-span-4">
                   <label className="block text-sm font-medium text-foreground mb-1">Title</label>
                   <input type="text" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Service title" className="w-full px-3 py-2 text-sm bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-foreground placeholder:text-muted-foreground" />
                 </div>

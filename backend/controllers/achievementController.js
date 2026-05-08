@@ -11,18 +11,25 @@ export const createAchievement = asyncHandler(async (req, res) => {
   const { title, description, imageUrl, certificateTag, companyName, iconPath } = req.body;
   
   let certificateImageUrl = '';
-  if (req.file) {
-    certificateImageUrl = await uploadToCloudinary(req.file.buffer, 'achievements');
+  let uploadedIconPath = '';
+
+  if (req.files) {
+    if (req.files.certificateImage) {
+      certificateImageUrl = await uploadToCloudinary(req.files.certificateImage[0].buffer, 'achievements');
+    }
+    if (req.files.iconPath) {
+      uploadedIconPath = await uploadToCloudinary(req.files.iconPath[0].buffer, 'achievements');
+    }
   }
 
   const achievement = new Achievement({
     title,
     description,
-    certificateImage: certificateImageUrl || req.body.certificateImage,
+    certificateImage: certificateImageUrl || req.body.certificateImage || '',
     imageUrl: imageUrl || '',
     certificateTag: certificateTag || '',
     companyName: companyName || '',
-    iconPath: iconPath || '',
+    iconPath: uploadedIconPath || req.body.iconPath || '',
   });
 
   const createdAchievement = await achievement.save();
@@ -39,8 +46,14 @@ export const updateAchievement = asyncHandler(async (req, res) => {
     achievement.certificateTag = certificateTag !== undefined ? certificateTag : achievement.certificateTag;
     achievement.companyName = companyName !== undefined ? companyName : achievement.companyName;
     achievement.iconPath = iconPath !== undefined ? iconPath : achievement.iconPath;
-    if (req.file) {
-      achievement.certificateImage = await uploadToCloudinary(req.file.buffer, 'achievements');
+    
+    if (req.files) {
+      if (req.files.certificateImage) {
+        achievement.certificateImage = await uploadToCloudinary(req.files.certificateImage[0].buffer, 'achievements');
+      }
+      if (req.files.iconPath) {
+        achievement.iconPath = await uploadToCloudinary(req.files.iconPath[0].buffer, 'achievements');
+      }
     }
     const updated = await achievement.save();
     res.json(updated);

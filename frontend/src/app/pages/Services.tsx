@@ -1,61 +1,15 @@
 import { useState, useEffect } from "react";
 import { NavLink } from "react-router";
 import {
-  Code2,
-  Smartphone,
-  Globe,
-  Database,
-  Palette,
-  ShieldCheck,
-  ArrowRight,
-  Zap,
+  Code2, Smartphone, Globe, Database, Palette, ShieldCheck,
+  ArrowRight, Zap, Loader2, Briefcase,
 } from "lucide-react";
 import { motion } from "motion/react";
+import { api } from "../lib/api";
+import { IconRenderer } from "../components/ui/IconRenderer";
 
-const services = [
-  {
-    icon: Code2,
-    title: "Frontend Development",
-    description:
-      "Building pixel-perfect, high-performance web interfaces using React.js, TypeScript, and Tailwind CSS. Focused on clean, maintainable code and exceptional user experiences.",
-    tags: ["React.js", "TypeScript", "Tailwind CSS"],
-  },
-  {
-    icon: Database,
-    title: "Backend Development",
-    description:
-      "Designing and building scalable REST APIs and backend systems using Node.js, Express.js, and MongoDB. Robust architecture tailored to your business needs.",
-    tags: ["Node.js", "Express", "MongoDB"],
-  },
-  {
-    icon: Smartphone,
-    title: "Mobile App Development",
-    description:
-      "Creating cross-platform mobile applications using Flutter that deliver native-like performance on both iOS and Android from a single codebase.",
-    tags: ["Flutter", "Dart", "iOS & Android"],
-  },
-  {
-    icon: Globe,
-    title: "Full-Stack Web Apps",
-    description:
-      "End-to-end development of complete web applications — from database design to deployment. I handle the full product cycle with precision and care.",
-    tags: ["MERN Stack", "REST APIs", "Deployment"],
-  },
-  {
-    icon: Palette,
-    title: "UI/UX Design",
-    description:
-      "Designing clean, modern, and user-centric interfaces. Creating wireframes, prototypes, and design systems that translate ideas into beautiful visual experiences.",
-    tags: ["Figma", "Prototyping", "Design Systems"],
-  },
-  {
-    icon: ShieldCheck,
-    title: "Technical Consulting",
-    description:
-      "Providing expert guidance on technology stack choices, architecture decisions, code reviews, and best practices to help your team ship better software faster.",
-    tags: ["Architecture", "Code Review", "Strategy"],
-  },
-];
+
+// Custom icon lookup removed in favor of dynamic IconRenderer
 
 const process = [
   { step: "01", title: "Discovery", description: "Understanding your goals, target audience, and project requirements in detail." },
@@ -65,17 +19,16 @@ const process = [
 ];
 
 export default function Services() {
-  const [dbServices, setDbServices] = useState<any[]>(services);
+  const [services, setServices] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/services')
-      .then(res => res.json())
+    api.get('/services')
       .then(data => {
-        if (data && data.length > 0) {
-          setDbServices(data);
-        }
+        if (data && data.length > 0) setServices(data);
       })
-      .catch(err => console.error('Failed to fetch services:', err));
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
 
   return (
@@ -84,7 +37,7 @@ export default function Services() {
       <section className="relative pt-36 pb-24 px-6 lg:px-12 bg-primary overflow-hidden">
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none" />
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-background/5 blur-[120px] rounded-full pointer-events-none" />
-        
+
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -107,51 +60,56 @@ export default function Services() {
       {/* Services Grid */}
       <section className="py-24 px-6 lg:px-12 bg-background">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {dbServices.map((service, index) => (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                key={service.title}
-                className="group relative p-8 rounded-3xl bg-card border border-border shadow-sm hover:shadow-xl hover:border-primary/50 transition-all duration-300 cursor-default"
-              >
-                {/* Icon */}
-                <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-6 bg-primary/10 text-primary group-hover:scale-110 transition-transform duration-300">
-                  {typeof service.icon === 'string' ? (
-                    <img src={service.icon} alt="" className="w-7 h-7 object-contain" />
-                  ) : (
-                    <service.icon size={28} />
-                  )}
-                </div>
+          {loading ? (
+            <div className="flex justify-center items-center py-24 gap-3">
+              <Loader2 className="w-6 h-6 animate-spin text-primary" />
+              <span className="text-muted-foreground">Loading services...</span>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {services.map((service, index) => (
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                    key={service._id || service.title}
+                    className="group relative p-8 rounded-3xl bg-card border border-border shadow-sm hover:shadow-xl hover:border-primary/50 transition-all duration-300 cursor-default"
+                  >
+                    {/* Icon */}
+                    <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-6 bg-primary/10 text-primary group-hover:scale-110 transition-transform duration-300 overflow-hidden">
+                      <IconRenderer icon={service.icon} size={28} />
+                    </div>
 
-                <h3 className="text-2xl font-semibold mb-4 text-foreground group-hover:text-primary transition-colors">
-                  {service.title}
-                </h3>
-                <p className="text-muted-foreground leading-relaxed mb-8">
-                  {service.description}
-                </p>
+                    <h3 className="text-2xl font-semibold mb-4 text-foreground group-hover:text-primary transition-colors">
+                      {service.title}
+                    </h3>
+                    <p className="text-muted-foreground leading-relaxed mb-8">
+                      {service.description}
+                    </p>
 
-                {/* Tags */}
-                <div className="flex flex-wrap gap-2 mt-auto">
-                  {service.tags?.map((tag: string) => (
-                    <span
-                      key={tag}
-                      className="text-xs font-medium px-3 py-1.5 rounded-full bg-muted text-muted-foreground border border-border/50 group-hover:bg-primary/5 transition-colors"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
+                    {/* Tags */}
+                    {service.tags?.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mt-auto">
+                        {service.tags.map((tag: string) => (
+                          <span
+                            key={tag}
+                            className="text-xs font-medium px-3 py-1.5 rounded-full bg-muted text-muted-foreground border border-border/50 group-hover:bg-primary/5 transition-colors"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
 
-                {/* Hover arrow */}
-                <div className="absolute top-8 right-8 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0 text-primary">
-                  <ArrowRight size={24} />
-                </div>
-              </motion.div>
-            ))}
-          </div>
+                    {/* Hover arrow */}
+                    <div className="absolute top-8 right-8 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0 text-primary">
+                      <ArrowRight size={24} />
+                    </div>
+                </motion.div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 

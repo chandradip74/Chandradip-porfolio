@@ -7,6 +7,9 @@ export function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [location, setLocation] = useState('');
   const [roles, setRoles] = useState<string[]>([]);
   const [newRole, setNewRole] = useState('');
   const [description, setDescription] = useState('');
@@ -25,6 +28,9 @@ export function ProfilePage() {
       .then((data) => {
         if (data) {
           setName(data.name || '');
+          setEmail(data.email || '');
+          setPhone(data.phone || '');
+          setLocation(data.location || '');
           setRoles(data.role || []);
           setDescription(data.description || '');
           setAbout(data.aboutMe || '');
@@ -54,6 +60,9 @@ export function ProfilePage() {
     try {
       const formData = new FormData();
       formData.append('name', name);
+      formData.append('email', email);
+      formData.append('phone', phone);
+      formData.append('location', location);
       formData.append('role', JSON.stringify(roles));
       formData.append('description', description);
       formData.append('aboutMe', about);
@@ -157,6 +166,40 @@ export function ProfilePage() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 className="w-full px-3 py-2.5 text-sm bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-foreground"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1.5">Email</label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="hello@example.com"
+                  className="w-full px-3 py-2.5 text-sm bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-foreground placeholder:text-muted-foreground"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1.5">Phone</label>
+                <input
+                  type="text"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="+1 (555) 000-1234"
+                  className="w-full px-3 py-2.5 text-sm bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-foreground placeholder:text-muted-foreground"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1.5">Location</label>
+              <input
+                type="text"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                placeholder="City, Country"
+                className="w-full px-3 py-2.5 text-sm bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-foreground placeholder:text-muted-foreground"
               />
             </div>
 

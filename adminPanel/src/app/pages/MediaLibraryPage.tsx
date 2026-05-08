@@ -1,92 +1,97 @@
-import { useState, useRef } from 'react';
-import { Search, Grid3X3, List, Upload, Trash2, Eye, Copy, FileText, ImageIcon, Video, X, Filter } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { Search, Grid3X3, List, Upload, Trash2, Eye, Copy, FileText, ImageIcon, Video, X, Filter, Loader2, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
+import { api } from '../lib/api';
 
 interface MediaFile {
-  id: number;
+  _id: string;
   name: string;
-  type: 'image' | 'pdf' | 'video';
-  size: string;
-  date: string;
-  color: string;
+  url: string;
+  resourceType: string;
+  format: string;
+  size: number;
+  createdAt: string;
 }
 
-const initialFiles: MediaFile[] = [
-  { id: 1, name: 'profile-photo.jpg', type: 'image', size: '2.4 MB', date: '2024-01-15', color: 'from-blue-400 to-purple-500' },
-  { id: 2, name: 'CV_Alex_2024.pdf', type: 'pdf', size: '1.2 MB', date: '2024-01-10', color: 'from-red-400 to-orange-500' },
-  { id: 3, name: 'portfolio-screenshot.png', type: 'image', size: '3.8 MB', date: '2024-01-08', color: 'from-green-400 to-teal-500' },
-  { id: 4, name: 'aws-certificate.pdf', type: 'pdf', size: '0.8 MB', date: '2023-11-20', color: 'from-orange-400 to-yellow-500' },
-  { id: 5, name: 'demo-video.mp4', type: 'video', size: '18.5 MB', date: '2023-12-05', color: 'from-purple-400 to-pink-500' },
-  { id: 6, name: 'ecommerce-app.png', type: 'image', size: '4.1 MB', date: '2023-12-01', color: 'from-teal-400 to-cyan-500' },
-  { id: 7, name: 'meta-certificate.pdf', type: 'pdf', size: '0.9 MB', date: '2023-06-15', color: 'from-blue-400 to-indigo-500' },
-  { id: 8, name: 'project-demo.mp4', type: 'video', size: '24.3 MB', date: '2023-11-10', color: 'from-yellow-400 to-orange-500' },
-  { id: 9, name: 'tech-stack-diagram.png', type: 'image', size: '1.5 MB', date: '2023-10-20', color: 'from-pink-400 to-rose-500' },
-  { id: 10, name: 'freecodecamp-cert.pdf', type: 'pdf', size: '0.6 MB', date: '2022-09-01', color: 'from-purple-400 to-violet-500' },
-  { id: 11, name: 'headshot-2024.jpg', type: 'image', size: '1.8 MB', date: '2024-01-20', color: 'from-green-400 to-emerald-500' },
-  { id: 12, name: 'landing-page.png', type: 'image', size: '2.2 MB', date: '2024-01-05', color: 'from-sky-400 to-blue-500' },
-];
-
-const typeIcons = {
+const typeIcons: Record<string, any> = {
   image: ImageIcon,
   pdf: FileText,
   video: Video,
+  raw: FileText,
+  auto: FileText,
 };
 
-const typeColors = {
-  image: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
-  pdf: 'bg-red-500/10 text-red-600 dark:text-red-400',
-  video: 'bg-purple-500/10 text-purple-600 dark:text-purple-400',
-};
-
-const typeBadgeColors = {
+const typeBadgeColors: Record<string, string> = {
   image: 'bg-blue-500/15 text-blue-600 dark:text-blue-400',
   pdf: 'bg-red-500/15 text-red-600 dark:text-red-400',
   video: 'bg-purple-500/15 text-purple-600 dark:text-purple-400',
+  raw: 'bg-orange-500/15 text-orange-600 dark:text-orange-400',
+  auto: 'bg-gray-500/15 text-gray-600 dark:text-gray-400',
+};
+
+const formatSize = (bytes: number) => {
+  if (!bytes) return '0 B';
+  const k = 1024;
+  const sizes = ['B', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+};
+
+const getFileType = (file: MediaFile) => {
+  if (file.format === 'application/pdf' || file.format === 'pdf') return 'pdf';
+  if (file.resourceType === 'image') return 'image';
+  if (file.resourceType === 'video') return 'video';
+  return 'raw';
 };
 
 export function MediaLibraryPage() {
-  const [files, setFiles] = useState(initialFiles);
+  const [files, setFiles] = useState<MediaFile[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [activeTab, setActiveTab] = useState<'all' | 'image' | 'pdf' | 'video'>('all');
+  const [activeTab, setActiveTab] = useState<'all' | 'image' | 'pdf' | 'video' | 'raw'>('all');
   const [view, setView] = useState<'grid' | 'table'>('grid');
   const [isDragging, setIsDragging] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    api.get('/resources')
+      .then(setFiles)
+      .catch(() => toast.error('Failed to fetch media library'))
+      .finally(() => setLoading(false));
+  }, []);
 
   const filtered = files.filter((f) => {
     const matchSearch = f.name.toLowerCase().includes(search.toLowerCase());
-    const matchTab = activeTab === 'all' || f.type === activeTab;
+    const type = getFileType(f);
+    const matchTab = activeTab === 'all' || type === activeTab;
     return matchSearch && matchTab;
   });
 
   const counts = {
     all: files.length,
-    image: files.filter((f) => f.type === 'image').length,
-    pdf: files.filter((f) => f.type === 'pdf').length,
-    video: files.filter((f) => f.type === 'video').length,
+    image: files.filter((f) => getFileType(f) === 'image').length,
+    pdf: files.filter((f) => getFileType(f) === 'pdf').length,
+    video: files.filter((f) => getFileType(f) === 'video').length,
   };
 
   const handleUpload = async (fileList: FileList | null) => {
     if (!fileList || fileList.length === 0) return;
     const file = fileList[0];
     setUploading(true);
-    setUploadProgress(0);
-    for (let i = 0; i <= 100; i += 10) {
-      await new Promise((r) => setTimeout(r, 80));
-      setUploadProgress(i);
+    
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const newFile = await api.postForm('/resources', formData);
+      setFiles((prev) => [newFile, ...prev]);
+      toast.success(`"${file.name}" uploaded successfully!`);
+    } catch (e: any) {
+      toast.error(e.message || 'Upload failed');
+    } finally {
+      setUploading(false);
     }
-    const type = file.type.startsWith('image/') ? 'image' : file.type === 'application/pdf' ? 'pdf' : 'video';
-    const sizeKB = Math.round(file.size / 1024);
-    const size = sizeKB > 1024 ? `${(sizeKB / 1024).toFixed(1)} MB` : `${sizeKB} KB`;
-    const colors = ['from-blue-400 to-purple-500', 'from-green-400 to-teal-500', 'from-orange-400 to-yellow-500', 'from-pink-400 to-rose-500'];
-    const color = colors[Math.floor(Math.random() * colors.length)];
-    const newFile: MediaFile = { id: Date.now(), name: file.name, type, size, date: new Date().toISOString().split('T')[0], color };
-    setFiles((prev) => [newFile, ...prev]);
-    setUploading(false);
-    setUploadProgress(0);
-    toast.success(`"${file.name}" uploaded successfully!`);
   };
 
   const handleDrop = (e: React.DragEvent) => {
@@ -95,14 +100,20 @@ export function MediaLibraryPage() {
     handleUpload(e.dataTransfer.files);
   };
 
-  const handleDelete = (id: number) => {
-    setFiles(files.filter((f) => f.id !== id));
-    setDeleteId(null);
-    toast.success('File deleted');
+  const handleDelete = async (id: string) => {
+    try {
+      await api.del(`/resources/${id}`);
+      setFiles(files.filter((f) => f._id !== id));
+      toast.success('File deleted');
+    } catch (e: any) {
+      toast.error(e.message || 'Failed to delete');
+    } finally {
+      setDeleteId(null);
+    }
   };
 
-  const copyUrl = (name: string) => {
-    navigator.clipboard.writeText(`https://cdn.example.com/media/${name}`);
+  const copyUrl = (url: string) => {
+    navigator.clipboard.writeText(url);
     toast.success('URL copied to clipboard!');
   };
 
@@ -149,14 +160,15 @@ export function MediaLibraryPage() {
 
       {/* Upload progress */}
       {uploading && (
-        <div className="bg-card border border-border rounded-xl p-4">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-sm font-medium text-foreground">Uploading...</p>
-            <span className="text-sm text-muted-foreground">{uploadProgress}%</span>
-          </div>
-          <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
-            <div className="h-full bg-primary rounded-full transition-all duration-300" style={{ width: `${uploadProgress}%` }} />
-          </div>
+        <div className="bg-card border border-border rounded-xl p-4 flex items-center gap-3">
+          <Loader2 className="w-5 h-5 animate-spin text-primary" />
+          <p className="text-sm font-medium text-foreground">Uploading file...</p>
+        </div>
+      )}
+
+      {loading && (
+        <div className="flex items-center justify-center h-40">
+          <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
         </div>
       )}
 
@@ -196,24 +208,31 @@ export function MediaLibraryPage() {
       </div>
 
       {/* Grid view */}
-      {view === 'grid' && (
+      {view === 'grid' && !loading && (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6 gap-4">
           {filtered.map((file) => {
-            const Icon = typeIcons[file.type];
+            const fType = getFileType(file);
+            const Icon = typeIcons[fType] || FileText;
+            const displayDate = new Date(file.createdAt).toISOString().split('T')[0];
             return (
-              <div key={file.id} className="bg-card border border-border rounded-xl overflow-hidden hover:shadow-sm transition-all group">
-                <div className={`h-28 bg-gradient-to-br ${file.color} flex items-center justify-center relative`}>
-                  <Icon className="w-8 h-8 text-white/80" />
-                  <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5">
-                    <button onClick={() => copyUrl(file.name)} className="bg-white/90 text-gray-900 rounded-md p-1.5 hover:bg-white transition-colors"><Copy className="w-3.5 h-3.5" /></button>
-                    <button onClick={() => setDeleteId(file.id)} className="bg-white/90 text-red-600 rounded-md p-1.5 hover:bg-white transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
+              <div key={file._id} className="bg-card border border-border rounded-xl overflow-hidden hover:shadow-sm transition-all group">
+                <div className={`h-28 bg-muted flex items-center justify-center relative overflow-hidden`}>
+                  {fType === 'image' && file.url ? (
+                    <img src={file.url} alt={file.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <Icon className="w-8 h-8 text-muted-foreground" />
+                  )}
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5">
+                    <button onClick={() => window.open(file.url, '_blank')} className="bg-white/90 text-gray-900 rounded-md p-1.5 hover:bg-white transition-colors"><ExternalLink className="w-3.5 h-3.5" /></button>
+                    <button onClick={() => copyUrl(file.url)} className="bg-white/90 text-gray-900 rounded-md p-1.5 hover:bg-white transition-colors"><Copy className="w-3.5 h-3.5" /></button>
+                    <button onClick={() => setDeleteId(file._id)} className="bg-white/90 text-red-600 rounded-md p-1.5 hover:bg-white transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
                   </div>
                 </div>
                 <div className="p-3">
-                  <p className="text-xs font-medium text-foreground truncate">{file.name}</p>
+                  <p className="text-xs font-medium text-foreground truncate" title={file.name}>{file.name}</p>
                   <div className="flex items-center justify-between mt-1">
-                    <span className={`px-1.5 py-0.5 rounded text-xs font-medium uppercase ${typeBadgeColors[file.type]}`}>{file.type}</span>
-                    <span className="text-xs text-muted-foreground">{file.size}</span>
+                    <span className={`px-1.5 py-0.5 rounded text-xs font-medium uppercase ${typeBadgeColors[fType] || typeBadgeColors.raw}`}>{fType}</span>
+                    <span className="text-xs text-muted-foreground">{formatSize(file.size)}</span>
                   </div>
                 </div>
               </div>
@@ -223,7 +242,7 @@ export function MediaLibraryPage() {
       )}
 
       {/* Table view */}
-      {view === 'table' && (
+      {view === 'table' && !loading && (
         <div className="bg-card border border-border rounded-xl overflow-hidden">
           <table className="w-full">
             <thead>
@@ -237,26 +256,33 @@ export function MediaLibraryPage() {
             </thead>
             <tbody>
               {filtered.map((file) => {
-                const Icon = typeIcons[file.type];
+                const fType = getFileType(file);
+                const Icon = typeIcons[fType] || FileText;
+                const displayDate = new Date(file.createdAt).toISOString().split('T')[0];
                 return (
-                  <tr key={file.id} className="border-b border-border last:border-0 hover:bg-accent/30 transition-colors">
+                  <tr key={file._id} className="border-b border-border last:border-0 hover:bg-accent/30 transition-colors">
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
-                        <div className={`w-9 h-9 rounded-lg bg-gradient-to-br ${file.color} flex items-center justify-center flex-shrink-0`}>
-                          <Icon className="w-4 h-4 text-white/80" />
+                        <div className={`w-9 h-9 rounded-lg bg-muted flex items-center justify-center flex-shrink-0 overflow-hidden`}>
+                          {fType === 'image' && file.url ? (
+                            <img src={file.url} alt="" className="w-full h-full object-cover" />
+                          ) : (
+                            <Icon className="w-4 h-4 text-muted-foreground" />
+                          )}
                         </div>
-                        <span className="text-sm text-foreground truncate max-w-[180px]">{file.name}</span>
+                        <span className="text-sm text-foreground truncate max-w-[180px]" title={file.name}>{file.name}</span>
                       </div>
                     </td>
                     <td className="px-4 py-3 hidden sm:table-cell">
-                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium uppercase ${typeBadgeColors[file.type]}`}>{file.type}</span>
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium uppercase ${typeBadgeColors[fType] || typeBadgeColors.raw}`}>{fType}</span>
                     </td>
-                    <td className="px-4 py-3 text-sm text-muted-foreground hidden md:table-cell">{file.size}</td>
-                    <td className="px-4 py-3 text-sm text-muted-foreground hidden md:table-cell">{file.date}</td>
+                    <td className="px-4 py-3 text-sm text-muted-foreground hidden md:table-cell">{formatSize(file.size)}</td>
+                    <td className="px-4 py-3 text-sm text-muted-foreground hidden md:table-cell">{displayDate}</td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-1">
-                        <button onClick={() => copyUrl(file.name)} className="w-7 h-7 rounded-md hover:bg-accent flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"><Copy className="w-3.5 h-3.5" /></button>
-                        <button onClick={() => setDeleteId(file.id)} className="w-7 h-7 rounded-md hover:bg-red-500/10 flex items-center justify-center text-muted-foreground hover:text-red-500 transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
+                        <button onClick={() => window.open(file.url, '_blank')} className="w-7 h-7 rounded-md hover:bg-accent flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"><ExternalLink className="w-3.5 h-3.5" /></button>
+                        <button onClick={() => copyUrl(file.url)} className="w-7 h-7 rounded-md hover:bg-accent flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"><Copy className="w-3.5 h-3.5" /></button>
+                        <button onClick={() => setDeleteId(file._id)} className="w-7 h-7 rounded-md hover:bg-red-500/10 flex items-center justify-center text-muted-foreground hover:text-red-500 transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
                       </div>
                     </td>
                   </tr>

@@ -1,79 +1,33 @@
 import { useState, useEffect } from "react";
-import { Award, ExternalLink, Star, Trophy, GraduationCap, Zap } from "lucide-react";
+import { Award, ExternalLink, Star, Trophy, GraduationCap, Zap, Loader2 } from "lucide-react";
 import { motion } from "motion/react";
-import { FaAws, FaReact, FaGoogle, FaNodeJs } from "react-icons/fa";
-import { SiMongodb, SiFlutter } from "react-icons/si";
+import { api } from "../lib/api";
+import { IconRenderer } from "../components/ui/IconRenderer";
 
-const certificates = [
-  {
-    id: 1,
-    title: "AWS Certified Developer – Associate",
-    issuer: "Amazon Web Services",
-    date: "March 2025",
-    category: "Cloud",
-    description:
-      "Validates technical expertise in developing and maintaining applications on AWS. Covers core AWS services, deployment, and best practices.",
-    credentialId: "AWS-DEV-2025-001",
-    icon: <FaAws className="text-[#FF9900]" />,
-  },
-  {
-    id: 2,
-    title: "Meta React Developer Certificate",
-    issuer: "Meta (via Coursera)",
-    date: "January 2024",
-    category: "Frontend",
-    description:
-      "Comprehensive training in React.js fundamentals, hooks, state management, and building production-ready web applications.",
-    credentialId: "META-REACT-2024",
-    icon: <FaReact className="text-[#61DAFB]" />,
-  },
-  {
-    id: 3,
-    title: "MongoDB Certified Developer",
-    issuer: "MongoDB University",
-    date: "July 2024",
-    category: "Database",
-    description:
-      "Expert-level certification covering MongoDB data modeling, aggregation, performance optimization, and advanced querying.",
-    credentialId: "MONGO-DEV-2024",
-    icon: <SiMongodb className="text-[#47A248]" />,
-  },
-  {
-    id: 4,
-    title: "Google UX Design Certificate",
-    issuer: "Google (via Coursera)",
-    date: "September 2023",
-    category: "Design",
-    description:
-      "Foundation in UX research, wireframing, prototyping, and creating user-centered design solutions for digital products.",
-    credentialId: "GOOGLE-UX-2023",
-    icon: <FaGoogle className="text-[#4285F4]" />,
-  },
-  {
-    id: 5,
-    title: "Flutter & Dart Complete Bootcamp",
-    issuer: "Udemy",
-    date: "May 2023",
-    category: "Mobile",
-    description:
-      "Comprehensive Flutter and Dart development covering state management, animations, Firebase integration, and publishing apps.",
-    credentialId: "UDEMY-FLUTTER-2023",
-    icon: <SiFlutter className="text-[#02569B]" />,
-  },
-  {
-    id: 6,
-    title: "Node.js: The Complete Guide",
-    issuer: "Udemy",
-    date: "November 2022",
-    category: "Backend",
-    description:
-      "Advanced Node.js development including REST APIs, authentication, websockets, testing, and performance optimization techniques.",
-    credentialId: "UDEMY-NODE-2022",
-    icon: <FaNodeJs className="text-[#339933]" />,
-  },
-];
 
-const achievements = [
+interface Achievement {
+  _id: string;
+  title: string;
+  description: string;
+  certificateImage: string;
+  imageUrl: string;
+  certificateTag: string;
+  companyName: string;
+  iconPath: string;
+}
+
+const TAG_COLORS: Record<string, string> = {
+  Cloud: 'bg-blue-500/10 text-blue-500',
+  Frontend: 'bg-cyan-500/10 text-cyan-500',
+  Backend: 'bg-green-500/10 text-green-500',
+  Database: 'bg-orange-500/10 text-orange-500',
+  Mobile: 'bg-purple-500/10 text-purple-500',
+  Design: 'bg-pink-500/10 text-pink-500',
+  Security: 'bg-red-500/10 text-red-500',
+  AI: 'bg-violet-500/10 text-violet-500',
+};
+
+const NOTABLE_ACHIEVEMENTS = [
   {
     icon: Trophy,
     title: "Hackathon Winner",
@@ -101,16 +55,14 @@ const achievements = [
 ];
 
 export default function Achievement() {
-  const [hoveredId, setHoveredId] = useState<number | null>(null);
-  const [dbAchievements, setDbAchievements] = useState<any[]>(certificates);
+  const [achievements, setAchievements] = useState<Achievement[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/achievements')
-      .then(res => res.json())
-      .then(data => {
-        if (data && data.length > 0) setDbAchievements(data);
-      })
-      .catch(err => console.error('Failed to fetch achievements:', err));
+    api.get('/achievements')
+      .then(data => setAchievements(data))
+      .catch(err => console.error('Failed to fetch achievements:', err))
+      .finally(() => setLoading(false));
   }, []);
 
   return (
@@ -140,7 +92,7 @@ export default function Achievement() {
           {/* Stats */}
           <div className="flex flex-wrap justify-center gap-12 pt-10 border-t border-primary-foreground/10 mt-10">
             {[
-              { value: "6+", label: "Certificates" },
+              { value: `${achievements.length || "—"}+`, label: "Certificates" },
               { value: "4+", label: "Awards" },
               { value: "200+", label: "GitHub Stars" },
             ].map((s) => (
@@ -161,7 +113,7 @@ export default function Achievement() {
             <h2 className="text-4xl font-bold text-foreground">Notable Achievements</h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {achievements.map((item, index) => (
+            {NOTABLE_ACHIEVEMENTS.map((item, index) => (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -188,7 +140,7 @@ export default function Achievement() {
         </div>
       </section>
 
-      {/* Certificates Grid */}
+      {/* Certificates / Achievements from DB */}
       <section className="py-24 px-6 lg:px-12 bg-background">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16 space-y-4">
@@ -196,72 +148,93 @@ export default function Achievement() {
             <h2 className="text-4xl font-bold text-foreground">Certificates</h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {dbAchievements.map((cert, index) => (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                key={cert.id || cert._id || index}
-                className="group relative rounded-3xl overflow-hidden bg-card border border-border shadow-sm hover:shadow-xl hover:border-primary/50 transition-all duration-300"
-                onMouseEnter={() => setHoveredId(cert.id || cert._id)}
-                onMouseLeave={() => setHoveredId(null)}
-              >
-                {/* Top colored band or Image */}
-                {cert.imageUrl || cert.certificateImage ? (
-                  <div className="h-40 w-full overflow-hidden bg-muted">
-                    <img src={cert.imageUrl || cert.certificateImage} alt={cert.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                  </div>
-                ) : (
-                  <div className="h-2 w-full bg-primary" />
-                )}
-                
-                <div className="p-8 flex flex-col h-[calc(100%-8px)]">
-                  <div className="flex items-start justify-between mb-6">
-                    <span className="text-4xl group-hover:scale-110 transition-transform">
-                      {cert.iconPath ? <img src={cert.iconPath} className="w-10 h-10 object-contain" alt="" /> : cert.icon}
-                    </span>
-                    <span className="text-xs font-semibold px-4 py-1.5 rounded-full bg-muted text-muted-foreground border border-border/50">
-                      {cert.certificateTag || cert.category}
-                    </span>
-                  </div>
+          {loading ? (
+            <div className="flex justify-center items-center py-24 gap-3">
+              <Loader2 className="w-6 h-6 animate-spin text-primary" />
+              <span className="text-muted-foreground">Loading certificates...</span>
+            </div>
+          ) : achievements.length === 0 ? (
+            <div className="text-center py-20">
+              <Trophy className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+              <p className="text-lg text-muted-foreground">No certificates added yet.</p>
+              <p className="text-sm text-muted-foreground">Add certificates from the admin panel.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {achievements.map((cert, index) => {
+                const tagColor = TAG_COLORS[cert.certificateTag] || 'bg-accent text-accent-foreground';
+                const certImage = cert.imageUrl || cert.certificateImage;
 
-                  <div className="space-y-2 mb-6">
-                    <h3 className="text-xl font-bold leading-snug text-foreground group-hover:text-primary transition-colors">
-                      {cert.title}
-                    </h3>
-                    <p className="text-sm font-medium text-muted-foreground">
-                      {cert.companyName || cert.issuer}
-                    </p>
-                  </div>
+                return (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                    key={cert._id}
+                    className="group relative rounded-3xl overflow-hidden bg-card border border-border shadow-sm hover:shadow-xl hover:border-primary/50 transition-all duration-300"
+                  >
+                    {/* Top colored band or Image */}
+                    {certImage ? (
+                      <div className="h-40 w-full overflow-hidden bg-muted">
+                        <img
+                          src={certImage}
+                          alt={cert.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                      </div>
+                    ) : (
+                      <div className="h-2 w-full bg-primary" />
+                    )}
 
-                  <p className="text-sm leading-relaxed text-muted-foreground mb-8">
-                    {cert.description}
-                  </p>
+                    <div className="p-8 flex flex-col gap-4">
+                      {/* Icon + Tag row */}
+                      <div className="flex items-start justify-between">
+                        <div className="w-12 h-12 rounded-xl overflow-hidden flex items-center justify-center bg-yellow-500/10 text-yellow-500">
+                          <IconRenderer icon={cert.iconPath} size={24} />
+                        </div>
+                        {cert.certificateTag && (
+                          <span className={`text-xs font-semibold px-3 py-1.5 rounded-full ${tagColor}`}>
+                            {cert.certificateTag}
+                          </span>
+                        )}
+                      </div>
 
-                  <div className="mt-auto pt-6 border-t border-border/50 flex flex-col gap-4">
-                    <div className="flex items-center justify-between">
+                      {/* Title + Company */}
                       <div>
-                        <p className="text-xs text-muted-foreground/70 mb-1">Issued</p>
-                        <p className="text-sm font-semibold text-foreground">{cert.date}</p>
+                        <h3 className="text-xl font-bold leading-snug text-foreground group-hover:text-primary transition-colors">
+                          {cert.title}
+                        </h3>
+                        {cert.companyName && (
+                          <p className="text-sm font-medium text-blue-500 mt-1">{cert.companyName}</p>
+                        )}
                       </div>
-                      <div className="text-right">
-                        <p className="text-xs text-muted-foreground/70 mb-1">Credential ID</p>
-                        <p className="text-xs font-mono font-medium text-muted-foreground">{cert.credentialId}</p>
-                      </div>
-                    </div>
 
-                    <a href="#" className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-muted/50 hover:bg-primary hover:text-primary-foreground text-foreground text-sm font-semibold transition-all duration-300">
-                      <Award size={16} />
-                      View Certificate
-                      <ExternalLink size={14} />
-                    </a>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+                      <p className="text-sm leading-relaxed text-muted-foreground">
+                        {cert.description}
+                      </p>
+
+                      {/* Bottom action */}
+                      {certImage && (
+                        <div className="mt-auto pt-4 border-t border-border/50">
+                          <a
+                            href={certImage}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-muted/50 hover:bg-primary hover:text-primary-foreground text-foreground text-sm font-semibold transition-all duration-300"
+                          >
+                            <Award size={16} />
+                            View Certificate
+                            <ExternalLink size={14} />
+                          </a>
+                        </div>
+                      )}
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </section>
     </div>
