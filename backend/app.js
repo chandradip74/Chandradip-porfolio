@@ -13,6 +13,7 @@ import statsRoutes from './routes/statsRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import resourceRoutes from './routes/resourceRoutes.js';
 import interestRoutes from './routes/interestRoutes.js';
+import processRoutes from './routes/processRoutes.js';
 
 
 const app = express();
@@ -31,6 +32,10 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.get('/', (req, res) => {
+  res.send('API is running...');
+});
+
 app.use('/api/auth', authRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/services', serviceRoutes);
@@ -42,6 +47,7 @@ app.use('/api/technologies', technologyRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/resources', resourceRoutes);
 app.use('/api/interests', interestRoutes);
+app.use('/api/process', processRoutes);
 
 
 app.use(notFound);

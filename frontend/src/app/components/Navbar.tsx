@@ -30,7 +30,7 @@ export default function Navbar() {
     return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
   };
 
-  const displayName = profile?.name || "Alex Kumar";
+  const displayName = profile?.name || "Chandradipsinh";
   const displayInitials = getInitials(displayName);
 
   useEffect(() => {
@@ -51,12 +51,12 @@ export default function Navbar() {
     >
       <div className="max-w-7xl mx-auto px-6 lg:px-12 flex items-center justify-between h-20">
         {/* Logo */}
-        <NavLink to="/" className="flex items-center gap-2 group">
-          <div className="w-10 h-10 rounded-lg flex items-center justify-center transition-transform duration-300 group-hover:scale-110 bg-primary text-primary-foreground">
-            <span className="text-sm font-bold tracking-tight">{displayInitials}</span>
-          </div>
-          <span className="text-lg font-semibold tracking-tight hidden sm:block text-foreground">
-            {displayName}
+        <NavLink to="/" className="flex items-center group overflow-hidden px-1">
+          <span className="text-xl sm:text-2xl font-black tracking-tighter text-foreground flex items-center">
+            <span className="text-primary font-mono opacity-80 group-hover:opacity-100 group-hover:-translate-y-0.5 transition-all duration-300 mr-1">&lt;/&gt;</span>
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/60 group-hover:translate-x-1 transition-transform duration-300">
+              {displayName}
+            </span>
           </span>
         </NavLink>
 

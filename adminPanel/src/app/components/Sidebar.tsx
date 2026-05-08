@@ -2,7 +2,7 @@ import { NavLink, useNavigate } from 'react-router';
 import {
   LayoutDashboard, User, Cpu, Briefcase, FolderOpen,
   GitBranch, Trophy, ImageIcon, MessageSquare, Settings,
-  LogOut, ChevronLeft, ChevronRight, Zap, Sun, Moon, Palette
+  LogOut, ChevronLeft, ChevronRight, Zap, Sun, Moon, Palette, GitMerge
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useSidebar } from '../context/SidebarContext';
@@ -16,6 +16,7 @@ const navItems = [
   { label: 'Services', icon: Briefcase, path: '/services' },
   { label: 'Projects', icon: FolderOpen, path: '/projects' },
   { label: 'Journey', icon: GitBranch, path: '/journey' },
+  { label: 'Process', icon: GitMerge, path: '/process' },
   { label: 'Achievements', icon: Trophy, path: '/achievements' },
   { label: 'Media Library', icon: ImageIcon, path: '/media' },
   { label: 'Messages', icon: MessageSquare, path: '/messages' },

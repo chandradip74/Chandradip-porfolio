@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
-import { ExternalLink, ArrowRight, Loader2, FolderOpen } from "lucide-react";
+import { ExternalLink, ArrowRight, FolderOpen } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { api } from "../lib/api";
 import { IconRenderer } from "../components/ui/IconRenderer";
+import { ProjectsSkeleton } from "../components/Skeletons";
 
 
 interface Project {
@@ -50,7 +51,7 @@ export default function Projects() {
   return (
     <div className="bg-background text-foreground transition-colors duration-300 min-h-screen">
       {/* Hero */}
-      <section className="relative pt-36 pb-24 px-6 lg:px-12 bg-primary overflow-hidden">
+      <section className="relative pt-28 sm:pt-36 pb-16 sm:pb-24 px-4 sm:px-6 lg:px-12 bg-primary overflow-hidden">
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none" />
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-background/5 blur-[120px] rounded-full pointer-events-none" />
 
@@ -74,26 +75,23 @@ export default function Projects() {
       </section>
 
       {/* Search bar */}
-      <section className="py-8 px-6 lg:px-12 sticky top-20 z-30 bg-background/80 backdrop-blur-md border-b border-border">
+      <section className="py-6 sm:py-8 px-4 sm:px-6 lg:px-12 sticky top-16 sm:top-20 z-30 bg-background/80 backdrop-blur-md border-b border-border">
         <div className="max-w-7xl mx-auto flex justify-center">
           <input
             type="text"
             placeholder="Search projects..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full max-w-md px-5 py-2.5 rounded-xl bg-muted border border-border text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary placeholder:text-muted-foreground"
+            className="w-full max-w-md px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-muted border border-border text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary placeholder:text-muted-foreground"
           />
         </div>
       </section>
 
       {/* Projects Grid */}
-      <section className="py-20 px-6 lg:px-12 bg-background">
+      <section className="py-14 sm:py-20 px-4 sm:px-6 lg:px-12 bg-background">
         <div className="max-w-7xl mx-auto">
           {loading ? (
-            <div className="flex flex-col items-center justify-center py-24 gap-4">
-              <Loader2 className="w-8 h-8 animate-spin text-primary" />
-              <p className="text-muted-foreground">Loading projects...</p>
-            </div>
+            <ProjectsSkeleton />
           ) : projects.length === 0 ? (
             <motion.div
               initial={{ opacity: 0 }}
