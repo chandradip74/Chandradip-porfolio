@@ -146,16 +146,16 @@ export default function Contact() {
                   <a
                     key={label}
                     href={href}
-                    className="group flex items-center gap-5 p-6 rounded-2xl bg-card border border-border shadow-sm transition-all duration-300 hover:shadow-xl hover:bg-primary hover:border-primary hover:-translate-y-1"
+                    className="group flex items-center gap-4 p-5 rounded-2xl bg-card border border-border shadow-sm transition-all duration-300 hover:shadow-xl hover:bg-primary hover:border-primary hover:-translate-y-1"
                   >
-                    <div className="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0 bg-primary/10 text-primary group-hover:bg-primary-foreground/20 group-hover:text-primary-foreground transition-all duration-300">
-                      <Icon size={24} />
+                    <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 bg-primary/10 text-primary group-hover:bg-primary-foreground/20 group-hover:text-primary-foreground transition-all duration-300">
+                      <Icon size={22} />
                     </div>
-                    <div>
-                      <p className="text-sm font-medium mb-1 text-muted-foreground group-hover:text-primary-foreground/60 transition-colors uppercase tracking-wider">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-medium mb-0.5 text-muted-foreground group-hover:text-primary-foreground/60 transition-colors uppercase tracking-wider">
                         {label}
                       </p>
-                      <p className="text-lg font-semibold text-foreground group-hover:text-primary-foreground transition-colors">
+                      <p className="text-sm font-semibold text-foreground group-hover:text-primary-foreground transition-colors break-all leading-snug">
                         {value}
                       </p>
                     </div>

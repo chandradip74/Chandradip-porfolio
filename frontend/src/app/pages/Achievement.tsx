@@ -38,6 +38,8 @@ export default function Achievement() {
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<Stat[]>([]);
+  const [page, setPage] = useState(1);
+  const ITEMS_PER_PAGE = 6;
 
   useEffect(() => {
     api.get('/achievements')
@@ -112,9 +114,13 @@ export default function Achievement() {
               <p className="text-lg text-muted-foreground">No certificates added yet.</p>
               <p className="text-sm text-muted-foreground">Add certificates from the admin panel.</p>
             </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-              {achievements.map((cert, index) => {
+          ) : (() => {
+            const totalPages = Math.ceil(achievements.length / ITEMS_PER_PAGE);
+            const paged = achievements.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
+            return (
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+                  {paged.map((cert, index) => {
                 const tagColor = TAG_COLORS[cert.certificateTag] || 'bg-accent text-accent-foreground';
                 const certImage = cert.certificateImage || cert.imageUrl;
 
@@ -186,10 +192,46 @@ export default function Achievement() {
                   </motion.div>
                 );
               })}
-            </div>
-          )}
+                </div>
+
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <div className="flex items-center justify-center gap-2 mt-12">
+                    <button
+                      onClick={() => setPage(p => Math.max(1, p - 1))}
+                      disabled={page === 1}
+                      className="px-4 py-2 rounded-lg text-sm font-medium border border-border bg-card text-foreground hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    >
+                      ← Prev
+                    </button>
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(pg => (
+                      <button
+                        key={pg}
+                        onClick={() => setPage(pg)}
+                        className={`w-9 h-9 rounded-lg text-sm font-medium border transition-colors ${
+                          pg === page
+                            ? 'bg-primary text-primary-foreground border-primary'
+                            : 'border-border bg-card text-foreground hover:bg-muted'
+                        }`}
+                      >
+                        {pg}
+                      </button>
+                    ))}
+                    <button
+                      onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                      disabled={page === totalPages}
+                      className="px-4 py-2 rounded-lg text-sm font-medium border border-border bg-card text-foreground hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    >
+                      Next →
+                    </button>
+                  </div>
+                )}
+              </>
+            );
+          })()}
         </div>
       </section>
     </div>
   );
 }
+

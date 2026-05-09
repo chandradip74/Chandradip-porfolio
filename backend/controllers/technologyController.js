@@ -7,11 +7,12 @@ export const getTechnologies = asyncHandler(async (req, res) => {
 });
 
 export const createTechnology = asyncHandler(async (req, res) => {
-  const { technologyName, iconPath } = req.body;
+  const { technologyName, iconPath, colorClass } = req.body;
 
   const technology = new Technology({
     technologyName,
     iconPath,
+    colorClass,
   });
 
   const createdTechnology = await technology.save();
@@ -22,9 +23,10 @@ export const updateTechnology = asyncHandler(async (req, res) => {
   const technology = await Technology.findById(req.params.id);
 
   if (technology) {
-    const { technologyName, iconPath } = req.body;
+    const { technologyName, iconPath, colorClass } = req.body;
     technology.technologyName = technologyName || technology.technologyName;
     technology.iconPath = iconPath !== undefined ? iconPath : technology.iconPath;
+    technology.colorClass = colorClass !== undefined ? colorClass : technology.colorClass;
     const updated = await technology.save();
     res.json(updated);
   } else {

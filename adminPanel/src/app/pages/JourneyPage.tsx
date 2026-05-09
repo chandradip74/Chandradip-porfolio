@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Pencil, Trash2, X, Save, Loader2, GitBranch } from 'lucide-react';
+import { Plus, Pencil, Trash2, X, Save, Loader2, GitBranch, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { api } from '../lib/api';
 
@@ -19,7 +19,12 @@ export function JourneyPage() {
   const [editing, setEditing] = useState<Journey | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Journey | null>(null);
   const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState({ year: String(new Date().getFullYear()), title: '', label: '', description: '' });
+  const [form, setForm] = useState({ year: String(new Date().getFullYear()), title: '', label: '', labelColor: '', description: '' });
+  const [errors, setErrors] = useState<Record<string,string>>({});
+
+  const FieldError = ({ msg }: { msg?: string }) => msg ? (
+    <p className="flex items-center gap-1 text-xs text-red-500 mt-1"><AlertCircle className="w-3 h-3 flex-shrink-0" />{msg}</p>
+  ) : null;
 
   const fetchEntries = () => {
     setLoading(true);
@@ -35,19 +40,23 @@ export function JourneyPage() {
 
   const openAdd = () => {
     setEditing(null);
-    setForm({ year: String(new Date().getFullYear()), title: '', label: '', description: '' });
+    setForm({ year: String(new Date().getFullYear()), title: '', label: '', labelColor: '', description: '' });
     setModalOpen(true);
   };
 
   const openEdit = (e: Journey) => {
     setEditing(e);
-    setForm({ year: e.year, title: e.title, label: e.label || '', description: e.description });
+    setForm({ year: e.year, title: e.title, label: e.label || '', labelColor: (e as any).labelColor || '', description: e.description });
     setModalOpen(true);
   };
 
   const handleSave = async () => {
-    if (!form.title.trim()) { toast.error('Title is required'); return; }
-    if (!form.description.trim()) { toast.error('Description is required'); return; }
+    const e: Record<string,string> = {};
+    if (!form.year.trim()) e.year = 'Year is required';
+    if (!form.title.trim()) e.title = 'Title is required';
+    if (!form.description.trim()) e.description = 'Description is required';
+    setErrors(e);
+    if (Object.keys(e).length > 0) return;
     setSaving(true);
     try {
       if (editing) {
@@ -153,8 +162,9 @@ export function JourneyPage() {
             <div className="space-y-3">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">Year</label>
-                  <input type="text" value={form.year} onChange={(e) => setForm({ ...form, year: e.target.value })} placeholder="2024" className="w-full px-3 py-2 text-sm bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-foreground" />
+                  <label className="block text-sm font-medium text-foreground mb-1">Year <span className="text-red-500">*</span></label>
+                  <input type="text" value={form.year} onChange={(e) => { setForm({ ...form, year: e.target.value }); if (errors.year) setErrors({...errors, year: ''}); }} placeholder="2024" className={`w-full px-3 py-2 text-sm bg-input-background border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-foreground ${errors.year ? 'border-red-500' : 'border-border'}`} />
+                  <FieldError msg={errors.year} />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-1">Label/Badge</label>
@@ -162,12 +172,26 @@ export function JourneyPage() {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-foreground mb-1">Title</label>
-                <input type="text" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="e.g. Senior Developer" className="w-full px-3 py-2 text-sm bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-foreground placeholder:text-muted-foreground" />
+                <label className="block text-sm font-medium text-foreground mb-1 text-xs">Label Color Class (Tailwind)</label>
+                <input type="text" value={form.labelColor} onChange={(e) => setForm({ ...form, labelColor: e.target.value })} placeholder="e.g. text-blue-500" className="w-full px-3 py-2 text-sm bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-foreground placeholder:text-muted-foreground" />
+              </div>
+              {(form.label) && (
+                <div className="flex items-center gap-2 p-3 bg-accent rounded-lg border border-border/50">
+                  <span className="text-xs text-muted-foreground">Preview:</span>
+                  <span className={`px-2 py-0.5 rounded-full text-xs font-medium border border-border/50 bg-background ${form.labelColor || 'text-foreground'}`}>
+                    {form.label}
+                  </span>
+                </div>
+              )}
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">Title <span className="text-red-500">*</span></label>
+                <input type="text" value={form.title} onChange={(e) => { setForm({ ...form, title: e.target.value }); if (errors.title) setErrors({...errors, title: ''}); }} placeholder="e.g. Senior Developer" className={`w-full px-3 py-2 text-sm bg-input-background border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-foreground placeholder:text-muted-foreground ${errors.title ? 'border-red-500' : 'border-border'}`} />
+                <FieldError msg={errors.title} />
               </div>
               <div>
-                <label className="block text-sm font-medium text-foreground mb-1">Description</label>
-                <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={4} placeholder="Describe this milestone..." className="w-full px-3 py-2 text-sm bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-foreground resize-none placeholder:text-muted-foreground" />
+                <label className="block text-sm font-medium text-foreground mb-1">Description <span className="text-red-500">*</span></label>
+                <textarea value={form.description} onChange={(e) => { setForm({ ...form, description: e.target.value }); if (errors.description) setErrors({...errors, description: ''}); }} rows={4} placeholder="Describe this milestone..." className={`w-full px-3 py-2 text-sm bg-input-background border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-foreground resize-none placeholder:text-muted-foreground ${errors.description ? 'border-red-500' : 'border-border'}`} />
+                <FieldError msg={errors.description} />
               </div>
             </div>
             <div className="flex gap-3 pt-2">

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Search, Pencil, Trash2, X, Save, Loader2, Palette } from 'lucide-react';
+import { Plus, Search, Pencil, Trash2, X, Save, Loader2, Palette, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { api } from '../lib/api';
 import { IconRenderer } from '../components/ui/IconRenderer';
@@ -26,6 +26,11 @@ export function InterestsPage() {
     color: 'text-primary', 
     bg: 'bg-primary/10' 
   });
+  const [errors, setErrors] = useState<Record<string,string>>({});
+
+  const FieldError = ({ msg }: { msg?: string }) => msg ? (
+    <p className="flex items-center gap-1 text-xs text-red-500 mt-1"><AlertCircle className="w-3 h-3 flex-shrink-0" />{msg}</p>
+  ) : null;
 
   const fetchInterests = () => {
     setLoading(true);
@@ -44,6 +49,7 @@ export function InterestsPage() {
   const openAdd = () => {
     setEditing(null);
     setForm({ title: '', icon: '', color: 'text-primary', bg: 'bg-primary/10' });
+    setErrors({});
     setModalOpen(true);
   };
 
@@ -55,11 +61,15 @@ export function InterestsPage() {
       color: i.color || 'text-primary', 
       bg: i.bg || 'bg-primary/10' 
     });
+    setErrors({});
     setModalOpen(true);
   };
 
   const handleSave = async () => {
-    if (!form.title.trim()) { toast.error('Title is required'); return; }
+    const e: Record<string,string> = {};
+    if (!form.title.trim()) e.title = 'Title is required';
+    setErrors(e);
+    if (Object.keys(e).length > 0) return;
     setSaving(true);
     try {
       if (editing) {
@@ -121,7 +131,10 @@ export function InterestsPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           {filtered.map((interest) => (
             <div key={interest._id} className="bg-card border border-border rounded-xl p-4 hover:shadow-sm transition-all group flex items-center gap-4">
-              <div className={`w-12 h-12 rounded-xl flex items-center justify-center overflow-hidden flex-shrink-0 ${interest.bg} ${interest.color}`}>
+              <div 
+                className={`w-12 h-12 rounded-xl flex items-center justify-center overflow-hidden flex-shrink-0 ${interest.bg} ${(!interest.color?.startsWith('#') && !interest.color?.startsWith('rgb')) ? interest.color : ''}`}
+                style={(interest.color?.startsWith('#') || interest.color?.startsWith('rgb')) ? { color: interest.color } : undefined}
+              >
                 <IconRenderer icon={interest.icon} size={24} />
               </div>
               <div className="flex-1 min-w-0">
@@ -180,12 +193,12 @@ export function InterestsPage() {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-1 text-xs">Color Class (Tailwind)</label>
+                  <label className="block text-sm font-medium text-foreground mb-1 text-xs">Color (Tailwind Class or Hex)</label>
                   <input
                     type="text"
                     value={form.color}
                     onChange={(e) => setForm({ ...form, color: e.target.value })}
-                    placeholder='text-primary'
+                    placeholder='text-primary or #3b82f6'
                     className="w-full px-3 py-2 text-xs bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-foreground"
                   />
                 </div>
@@ -204,7 +217,10 @@ export function InterestsPage() {
               <div className="flex flex-col items-center gap-3 p-4 bg-accent rounded-xl border border-border/50">
                 <span className="text-xs text-muted-foreground self-start mb-1">Live Preview:</span>
                 <div className={`flex items-center gap-4 p-4 rounded-2xl bg-background border border-border shadow-sm w-full`}>
-                  <div className={`p-2.5 rounded-xl ${form.bg} ${form.color}`}>
+                  <div 
+                    className={`p-2.5 rounded-xl ${form.bg} ${(!form.color?.startsWith('#') && !form.color?.startsWith('rgb')) ? form.color : ''}`}
+                    style={(form.color?.startsWith('#') || form.color?.startsWith('rgb')) ? { color: form.color } : undefined}
+                  >
                     <IconRenderer icon={form.icon} size={20} />
                   </div>
                   <span className="font-medium text-sm">{form.title || 'Interest Title'}</span>

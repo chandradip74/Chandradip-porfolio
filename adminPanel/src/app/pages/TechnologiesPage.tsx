@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Search, Pencil, Trash2, X, Save, Loader2 } from 'lucide-react';
+import { Plus, Search, Pencil, Trash2, X, Save, Loader2, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { api } from '../lib/api';
 import { IconRenderer } from '../components/ui/IconRenderer';
@@ -9,6 +9,7 @@ interface Technology {
   _id: string;
   technologyName: string;
   iconPath: string;
+  colorClass: string;
 }
 
 export function TechnologiesPage() {
@@ -19,7 +20,12 @@ export function TechnologiesPage() {
   const [editing, setEditing] = useState<Technology | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Technology | null>(null);
   const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState({ technologyName: '', iconPath: '' });
+  const [form, setForm] = useState({ technologyName: '', iconPath: '', colorClass: 'text-primary' });
+  const [errors, setErrors] = useState<Record<string,string>>({});
+
+  const FieldError = ({ msg }: { msg?: string }) => msg ? (
+    <p className="flex items-center gap-1 text-xs text-red-500 mt-1"><AlertCircle className="w-3 h-3 flex-shrink-0" />{msg}</p>
+  ) : null;
 
   const fetchTechs = () => {
     setLoading(true);
@@ -37,18 +43,23 @@ export function TechnologiesPage() {
 
   const openAdd = () => {
     setEditing(null);
-    setForm({ technologyName: '', iconPath: '' });
+    setForm({ technologyName: '', iconPath: '', colorClass: 'text-primary' });
+    setErrors({});
     setModalOpen(true);
   };
 
   const openEdit = (t: Technology) => {
     setEditing(t);
-    setForm({ technologyName: t.technologyName, iconPath: t.iconPath || '' });
+    setForm({ technologyName: t.technologyName, iconPath: t.iconPath || '', colorClass: t.colorClass || 'text-primary' });
+    setErrors({});
     setModalOpen(true);
   };
 
   const handleSave = async () => {
-    if (!form.technologyName.trim()) { toast.error('Name is required'); return; }
+    const e: Record<string,string> = {};
+    if (!form.technologyName.trim()) e.technologyName = 'Technology name is required';
+    setErrors(e);
+    if (Object.keys(e).length > 0) return;
     setSaving(true);
     try {
       if (editing) {
@@ -111,7 +122,10 @@ export function TechnologiesPage() {
           {filtered.map((tech) => (
             <div key={tech._id} className="bg-card border border-border rounded-xl p-4 hover:shadow-sm transition-all group">
               <div className="flex items-start justify-between mb-3">
-                <div className="w-10 h-10 rounded-lg bg-accent flex items-center justify-center overflow-hidden flex-shrink-0">
+                <div 
+                  className={`w-10 h-10 rounded-lg bg-accent flex items-center justify-center overflow-hidden flex-shrink-0 ${(!tech.colorClass?.startsWith('#') && !tech.colorClass?.startsWith('rgb')) ? tech.colorClass : ''}`}
+                  style={(tech.colorClass?.startsWith('#') || tech.colorClass?.startsWith('rgb')) ? { color: tech.colorClass } : undefined}
+                >
                   <IconRenderer icon={tech.iconPath} size={28} />
                 </div>
                 <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -148,14 +162,15 @@ export function TechnologiesPage() {
             </div>
             <div className="space-y-3">
               <div>
-                <label className="block text-sm font-medium text-foreground mb-1">Technology Name</label>
+                <label className="block text-sm font-medium text-foreground mb-1">Technology Name <span className="text-red-500">*</span></label>
                 <input
                   type="text"
                   value={form.technologyName}
-                  onChange={(e) => setForm({ ...form, technologyName: e.target.value })}
+                  onChange={(e) => { setForm({ ...form, technologyName: e.target.value }); if (errors.technologyName) setErrors({...errors, technologyName: ''}); }}
                   placeholder="e.g. React.js"
-                  className="w-full px-3 py-2 text-sm bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-foreground placeholder:text-muted-foreground"
+                  className={`w-full px-3 py-2 text-sm bg-input-background border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-foreground placeholder:text-muted-foreground ${errors.technologyName ? 'border-red-500' : 'border-border'}`}
                 />
+                <FieldError msg={errors.technologyName} />
               </div>
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1">Icon <span className="text-xs font-normal text-muted-foreground">(FontAwesome HTML, React Icon name, or Image URL)</span></label>
@@ -167,9 +182,22 @@ export function TechnologiesPage() {
                   className="w-full px-3 py-2 text-sm bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-foreground placeholder:text-muted-foreground"
                 />
               </div>
-              {form.iconPath && (
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1 text-xs">Color (Tailwind Class or Hex)</label>
+                <input
+                  type="text"
+                  value={form.colorClass}
+                  onChange={(e) => setForm({ ...form, colorClass: e.target.value })}
+                  placeholder="e.g. text-blue-500 or #3b82f6"
+                  className="w-full px-3 py-2 text-sm bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-foreground placeholder:text-muted-foreground"
+                />
+              </div>
+              {(form.iconPath || form.colorClass) && (
                 <div className="flex flex-col items-center gap-3 p-3 bg-accent rounded-lg border border-border/50">
-                  <div className="w-12 h-12 rounded-lg bg-background flex items-center justify-center shadow-sm">
+                  <div 
+                    className={`w-12 h-12 rounded-lg bg-background flex items-center justify-center shadow-sm ${(!form.colorClass?.startsWith('#') && !form.colorClass?.startsWith('rgb')) ? form.colorClass : ''}`}
+                    style={(form.colorClass?.startsWith('#') || form.colorClass?.startsWith('rgb')) ? { color: form.colorClass } : undefined}
+                  >
                     <IconRenderer icon={form.iconPath} size={32} />
                   </div>
                   <span className="text-xs text-muted-foreground font-medium">Icon preview</span>

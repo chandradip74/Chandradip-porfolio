@@ -28,6 +28,8 @@ export default function Home() {
   const [journeyLoading, setJourneyLoading] = useState(true);
   const [technologies, setTechnologies] = useState<any[]>([]);
   const [techLoading, setTechLoading] = useState(true);
+  const [techPage, setTechPage] = useState(1);
+  const TECH_PER_PAGE = 8;
   const [interests, setInterests] = useState<any[]>([]);
   const [interestsLoading, setInterestsLoading] = useState(true);
 
@@ -336,25 +338,65 @@ export default function Home() {
           </div>
           {techLoading ? (
             <TechnologiesSkeleton />
-          ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6">
-              {technologies.map((tech, i) => (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.06 }}
-                  key={tech._id || tech.technologyName || i}
-                  className="group flex flex-col items-center gap-3 sm:gap-4 p-5 sm:p-8 rounded-2xl bg-card border border-border shadow-sm hover:shadow-md hover:border-primary/50 transition-all cursor-default"
-                >
-                  <span className="text-3xl sm:text-4xl group-hover:scale-110 transition-transform duration-300">
-                    <IconRenderer icon={tech.iconPath} size={36} />
-                  </span>
-                  <span className="text-xs sm:text-sm font-medium text-center">{tech.technologyName}</span>
-                </motion.div>
-              ))}
-            </div>
-          )}
+          ) : (() => {
+            const totalPages = Math.ceil(technologies.length / TECH_PER_PAGE);
+            const paged = technologies.slice((techPage - 1) * TECH_PER_PAGE, techPage * TECH_PER_PAGE);
+            return (
+              <>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6">
+                  {paged.map((tech, i) => (
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: i * 0.06 }}
+                      key={tech._id || tech.technologyName || i}
+                      className="group flex flex-col items-center gap-3 sm:gap-4 p-5 sm:p-8 rounded-2xl bg-card border border-border shadow-sm hover:shadow-md hover:border-primary/50 transition-all cursor-default"
+                    >
+                      <span 
+                        className={`text-3xl sm:text-4xl group-hover:scale-110 transition-transform duration-300 ${(!tech.colorClass?.startsWith('#') && !tech.colorClass?.startsWith('rgb')) ? tech.colorClass : ''}`}
+                        style={(tech.colorClass?.startsWith('#') || tech.colorClass?.startsWith('rgb')) ? { color: tech.colorClass } : undefined}
+                      >
+                        <IconRenderer icon={tech.iconPath} size={36} />
+                      </span>
+                      <span className="text-xs sm:text-sm font-medium text-center">{tech.technologyName}</span>
+                    </motion.div>
+                  ))}
+                </div>
+                {totalPages > 1 && (
+                  <div className="flex items-center justify-center gap-2 mt-10">
+                    <button
+                      onClick={() => setTechPage(p => Math.max(1, p - 1))}
+                      disabled={techPage === 1}
+                      className="px-4 py-2 rounded-lg text-sm font-medium border border-border bg-card text-foreground hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    >
+                      ← Prev
+                    </button>
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                      <button
+                        key={page}
+                        onClick={() => setTechPage(page)}
+                        className={`w-9 h-9 rounded-lg text-sm font-medium border transition-colors ${
+                          page === techPage
+                            ? 'bg-primary text-primary-foreground border-primary'
+                            : 'border-border bg-card text-foreground hover:bg-muted'
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    ))}
+                    <button
+                      onClick={() => setTechPage(p => Math.min(totalPages, p + 1))}
+                      disabled={techPage === totalPages}
+                      className="px-4 py-2 rounded-lg text-sm font-medium border border-border bg-card text-foreground hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    >
+                      Next →
+                    </button>
+                  </div>
+                )}
+              </>
+            );
+          })()}
         </div>
       </section>
 
@@ -413,7 +455,10 @@ export default function Home() {
                           <span className="text-sm font-semibold px-4 py-1.5 rounded-full bg-primary/10 text-primary">
                             {item.year}
                           </span>
-                          <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                          <span 
+                            className={`text-xs font-bold uppercase tracking-wider ${(!item.labelColor?.startsWith('#') && !item.labelColor?.startsWith('rgb')) ? (item.labelColor || 'text-muted-foreground') : ''}`}
+                            style={(item.labelColor?.startsWith('#') || item.labelColor?.startsWith('rgb')) ? { color: item.labelColor } : undefined}
+                          >
                             {item.label || item.badge}
                           </span>
                         </div>

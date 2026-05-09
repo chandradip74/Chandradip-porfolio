@@ -35,6 +35,8 @@ export default function Projects() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
+  const PROJECTS_PER_PAGE = 6;
 
   useEffect(() => {
     api.get('/projects')
@@ -47,6 +49,14 @@ export default function Projects() {
     p.title.toLowerCase().includes(search.toLowerCase()) ||
     p.description.toLowerCase().includes(search.toLowerCase())
   );
+
+  const totalPages = Math.ceil(filtered.length / PROJECTS_PER_PAGE);
+  const paged = filtered.slice((page - 1) * PROJECTS_PER_PAGE, page * PROJECTS_PER_PAGE);
+
+  const handleSearch = (val: string) => {
+    setSearch(val);
+    setPage(1);
+  };
 
   return (
     <div className="bg-background text-foreground transition-colors duration-300 min-h-screen">
@@ -81,7 +91,7 @@ export default function Projects() {
             type="text"
             placeholder="Search projects..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => handleSearch(e.target.value)}
             className="w-full max-w-md px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-muted border border-border text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary placeholder:text-muted-foreground"
           />
         </div>
@@ -105,7 +115,7 @@ export default function Projects() {
           ) : (
             <motion.div layout className="grid grid-cols-1 md:grid-cols-2 gap-10">
               <AnimatePresence>
-                {filtered.map((project) => (
+                {paged.map((project) => (
                   <motion.div
                     layout
                     initial={{ opacity: 0, scale: 0.95 }}
@@ -202,6 +212,39 @@ export default function Projects() {
             >
               <p className="text-lg text-muted-foreground">No projects match your search.</p>
             </motion.div>
+          )}
+
+          {/* Pagination */}
+          {!loading && totalPages > 1 && filtered.length > 0 && (
+            <div className="flex items-center justify-center gap-2 mt-12">
+              <button
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={page === 1}
+                className="px-4 py-2 rounded-lg text-sm font-medium border border-border bg-card text-foreground hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              >
+                ← Prev
+              </button>
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(pg => (
+                <button
+                  key={pg}
+                  onClick={() => setPage(pg)}
+                  className={`w-9 h-9 rounded-lg text-sm font-medium border transition-colors ${
+                    pg === page
+                      ? 'bg-primary text-primary-foreground border-primary'
+                      : 'border-border bg-card text-foreground hover:bg-muted'
+                  }`}
+                >
+                  {pg}
+                </button>
+              ))}
+              <button
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+                className="px-4 py-2 rounded-lg text-sm font-medium border border-border bg-card text-foreground hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              >
+                Next →
+              </button>
+            </div>
           )}
         </div>
       </section>

@@ -7,12 +7,13 @@ export const getJourneys = asyncHandler(async (req, res) => {
 });
 
 export const createJourney = asyncHandler(async (req, res) => {
-  const { year, title, label, description } = req.body;
+  const { year, title, label, labelColor, description } = req.body;
 
   const journey = new Journey({
     year,
     title,
     label,
+    labelColor,
     description,
   });
 
@@ -23,10 +24,11 @@ export const createJourney = asyncHandler(async (req, res) => {
 export const updateJourney = asyncHandler(async (req, res) => {
   const journey = await Journey.findById(req.params.id);
   if (journey) {
-    const { year, title, label, description } = req.body;
+    const { year, title, label, labelColor, description } = req.body;
     journey.year = year || journey.year;
     journey.title = title || journey.title;
     journey.label = label !== undefined ? label : journey.label;
+    journey.labelColor = labelColor !== undefined ? labelColor : journey.labelColor;
     journey.description = description || journey.description;
     const updated = await journey.save();
     res.json(updated);

@@ -13,6 +13,7 @@ import { MessagesPage } from './pages/MessagesPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { InterestsPage } from './pages/InterestsPage';
 import { ProcessPage } from './pages/ProcessPage';
+import { SocialMediaPage } from './pages/SocialMediaPage';
 
 
 export const router = createBrowserRouter([
@@ -33,6 +34,7 @@ export const router = createBrowserRouter([
       { path: 'messages', Component: MessagesPage },
       { path: 'interests', Component: InterestsPage },
       { path: 'settings', Component: SettingsPage },
+      { path: 'social-media', Component: SocialMediaPage },
 
     ],
   },
