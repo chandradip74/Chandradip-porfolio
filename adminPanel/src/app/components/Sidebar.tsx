@@ -2,7 +2,7 @@ import { NavLink, useNavigate } from 'react-router';
 import {
   LayoutDashboard, User, Cpu, Briefcase, FolderOpen,
   GitBranch, Trophy, ImageIcon, MessageSquare, Settings,
-  LogOut, ChevronLeft, ChevronRight, Zap, Sun, Moon, Palette, GitMerge, Share2
+  LogOut, ChevronLeft, ChevronRight, Zap, Sun, Moon, Palette, GitMerge, Share2, BookOpen
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useSidebar } from '../context/SidebarContext';
@@ -22,6 +22,7 @@ const navItems = [
   { label: 'Messages', icon: MessageSquare, path: '/messages' },
   { label: 'Interests', icon: Palette, path: '/interests' },
   { label: 'Social Media', icon: Share2, path: '/social-media' },
+  { label: 'Blog', icon: BookOpen, path: '/blog' },
   { label: 'Settings', icon: Settings, path: '/settings' },
 ];
 

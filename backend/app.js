@@ -15,6 +15,7 @@ import resourceRoutes from './routes/resourceRoutes.js';
 import interestRoutes from './routes/interestRoutes.js';
 import processRoutes from './routes/processRoutes.js';
 import socialMediaRoutes from './routes/socialMediaRoutes.js';
+import blogRoutes from './routes/blogRoutes.js';
 
 
 const app = express();
@@ -50,6 +51,7 @@ app.use('/api/resources', resourceRoutes);
 app.use('/api/interests', interestRoutes);
 app.use('/api/process', processRoutes);
 app.use('/api/social-media', socialMediaRoutes);
+app.use('/api/blogs', blogRoutes);
 
 
 app.use(notFound);

@@ -41,17 +41,17 @@ export default function Home() {
 
     api.get('/journey')
       .then(data => { if (data?.length > 0) setJourney(data); })
-      .catch(() => {})
+      .catch(() => { })
       .finally(() => setJourneyLoading(false));
 
     api.get('/technologies')
       .then(data => { if (data?.length > 0) setTechnologies(data); })
-      .catch(() => {})
+      .catch(() => { })
       .finally(() => setTechLoading(false));
 
     api.get('/interests')
       .then(data => { if (data?.length > 0) setInterests(data); })
-      .catch(() => {})
+      .catch(() => { })
       .finally(() => setInterestsLoading(false));
   }, []);
 
@@ -86,7 +86,7 @@ export default function Home() {
 
               <div className="space-y-4 sm:space-y-6 flex flex-col items-center">
                 <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.1]">
-                  Hello, I'm
+                  Hello, How Are You? I'm
                   <br />
                   <span className="italic text-transparent bg-clip-text bg-gradient-to-r from-primary via-primary/80 to-primary/60">
                     {profileLoading ? (
@@ -340,7 +340,7 @@ export default function Home() {
                       key={tech._id || tech.technologyName || i}
                       className="group flex flex-col items-center gap-3 sm:gap-4 p-5 sm:p-8 rounded-2xl bg-card border border-border shadow-sm hover:shadow-md hover:border-primary/50 transition-all cursor-default"
                     >
-                      <span 
+                      <span
                         className={`text-3xl sm:text-4xl group-hover:scale-110 transition-transform duration-300 ${(!tech.colorClass?.startsWith('#') && !tech.colorClass?.startsWith('rgb')) ? tech.colorClass : ''}`}
                         style={(tech.colorClass?.startsWith('#') || tech.colorClass?.startsWith('rgb')) ? { color: tech.colorClass } : undefined}
                       >
@@ -363,11 +363,10 @@ export default function Home() {
                       <button
                         key={page}
                         onClick={() => setTechPage(page)}
-                        className={`w-9 h-9 rounded-lg text-sm font-medium border transition-colors ${
-                          page === techPage
+                        className={`w-9 h-9 rounded-lg text-sm font-medium border transition-colors ${page === techPage
                             ? 'bg-primary text-primary-foreground border-primary'
                             : 'border-border bg-card text-foreground hover:bg-muted'
-                        }`}
+                          }`}
                       >
                         {page}
                       </button>
@@ -414,9 +413,8 @@ export default function Home() {
                   return (
                     <div
                       key={item._id || item.year}
-                      className={`relative flex items-start gap-8 ${
-                        isEven ? "sm:flex-row" : "sm:flex-row-reverse"
-                      }`}
+                      className={`relative flex items-start gap-8 ${isEven ? "sm:flex-row" : "sm:flex-row-reverse"
+                        }`}
                     >
                       {/* Dot */}
                       <motion.div
@@ -442,7 +440,7 @@ export default function Home() {
                           <span className="text-sm font-semibold px-4 py-1.5 rounded-full bg-primary/10 text-primary">
                             {item.year}
                           </span>
-                          <span 
+                          <span
                             className={`text-xs font-bold uppercase tracking-wider ${(!item.labelColor?.startsWith('#') && !item.labelColor?.startsWith('rgb')) ? (item.labelColor || 'text-muted-foreground') : ''}`}
                             style={(item.labelColor?.startsWith('#') || item.labelColor?.startsWith('rgb')) ? { color: item.labelColor } : undefined}
                           >
