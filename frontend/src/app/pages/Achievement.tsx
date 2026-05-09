@@ -17,11 +17,7 @@ interface Achievement {
   iconPath: string;
 }
 
-interface Stat {
-  _id?: string;
-  label: string;
-  value: string;
-}
+
 
 const TAG_COLORS: Record<string, string> = {
   Cloud: 'bg-blue-500/10 text-blue-500',
@@ -37,7 +33,6 @@ const TAG_COLORS: Record<string, string> = {
 export default function Achievement() {
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState<Stat[]>([]);
   const [page, setPage] = useState(1);
   const ITEMS_PER_PAGE = 6;
 
@@ -47,18 +42,10 @@ export default function Achievement() {
       .catch(err => console.error('Failed to fetch achievements:', err))
       .finally(() => setLoading(false));
 
-    api.get('/stats')
-      .then(data => { if (data?.length > 0) setStats(data); })
-      .catch(() => {});
+
   }, []);
 
-  const heroStats = stats.length > 0
-    ? stats.slice(0, 3)
-    : [
-        { label: "Certificates", value: `${achievements.length || "—"}+` },
-        { label: "Projects Done", value: "30+" },
-        { label: "Happy Clients", value: "15+" },
-      ];
+
 
   return (
     <div className="bg-background text-foreground transition-colors duration-300 min-h-screen">
@@ -84,15 +71,7 @@ export default function Achievement() {
             continuous learning and excellence in software development.
           </p>
 
-          {/* Stats */}
-          <div className="flex flex-wrap justify-center gap-8 sm:gap-12 pt-8 sm:pt-10 border-t border-primary-foreground/10 mt-8 sm:mt-10">
-            {heroStats.map((s) => (
-              <div key={s.label} className="text-center">
-                <p className="text-3xl sm:text-4xl font-bold text-primary-foreground">{s.value}</p>
-                <p className="text-xs sm:text-sm font-medium tracking-wide mt-2 text-primary-foreground/60 uppercase">{s.label}</p>
-              </div>
-            ))}
-          </div>
+
         </motion.div>
       </section>
 

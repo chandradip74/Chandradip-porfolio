@@ -2,11 +2,14 @@ import { useState, useEffect } from 'react';
 import { Plus, Search, Pencil, Trash2, X, Save, Loader2, Share2, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { api } from '../lib/api';
+import { IconRenderer } from '../components/ui/IconRenderer';
 
 interface SocialMedia {
   _id: string;
   platform: string;
   image: string;
+  icon: string;
+  colorClass: string;
   link: string;
   order: number;
 }
@@ -28,7 +31,7 @@ export function SocialMediaPage() {
   const [editing, setEditing] = useState<SocialMedia | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<SocialMedia | null>(null);
   const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState({ platform: '', image: '', link: '', order: '0' });
+  const [form, setForm] = useState({ platform: '', icon: '', colorClass: '#6366f1', link: '', order: '0' });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const fetchItems = () => {
@@ -47,14 +50,20 @@ export function SocialMediaPage() {
 
   const openAdd = () => {
     setEditing(null);
-    setForm({ platform: '', image: '', link: '', order: '0' });
+    setForm({ platform: '', icon: '', colorClass: '#6366f1', link: '', order: '0' });
     setErrors({});
     setModalOpen(true);
   };
 
   const openEdit = (item: SocialMedia) => {
     setEditing(item);
-    setForm({ platform: item.platform, image: item.image, link: item.link, order: String(item.order) });
+    setForm({
+      platform: item.platform,
+      icon: item.icon || item.image || '',
+      colorClass: item.colorClass || '#6366f1',
+      link: item.link,
+      order: String(item.order),
+    });
     setErrors({});
     setModalOpen(true);
   };
@@ -62,8 +71,6 @@ export function SocialMediaPage() {
   const validate = () => {
     const e: Record<string, string> = {};
     if (!form.platform.trim()) e.platform = 'Platform name is required';
-    if (!form.image.trim()) e.image = 'Image URL is required';
-    else if (!/^https?:\/\/.+/.test(form.image.trim())) e.image = 'Must be a valid URL (starts with http/https)';
     if (!form.link.trim()) e.link = 'Profile link is required';
     else if (!/^https?:\/\/.+/.test(form.link.trim())) e.link = 'Must be a valid URL (starts with http/https)';
     setErrors(e);
@@ -73,7 +80,13 @@ export function SocialMediaPage() {
   const handleSave = async () => {
     if (!validate()) return;
     setSaving(true);
-    const payload = { ...form, order: Number(form.order) || 0 };
+    const payload = {
+      platform: form.platform,
+      icon: form.icon,
+      colorClass: form.colorClass,
+      link: form.link,
+      order: Number(form.order) || 0,
+    };
     try {
       if (editing) {
         const updated = await api.put(`/social-media/${editing._id}`, payload);
@@ -102,6 +115,9 @@ export function SocialMediaPage() {
       toast.error(e.message || 'Failed to delete');
     }
   };
+
+  /** Resolve which icon to show on the card (new icon field, fallback to image URL) */
+  const resolveIcon = (item: SocialMedia) => item.icon || item.image || '';
 
   return (
     <div className="max-w-6xl space-y-6">
@@ -135,15 +151,11 @@ export function SocialMediaPage() {
           {filtered.map((item) => (
             <div key={item._id} className="bg-card border border-border rounded-xl p-4 hover:shadow-sm transition-all group">
               <div className="flex items-start justify-between mb-3">
-                <div className="w-12 h-12 rounded-xl bg-accent flex items-center justify-center overflow-hidden flex-shrink-0 border border-border/50">
-                  <img
-                    src={item.image}
-                    alt={item.platform}
-                    className="w-8 h-8 object-contain"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).style.display = 'none';
-                    }}
-                  />
+                <div
+                  className={`w-12 h-12 rounded-xl bg-accent flex items-center justify-center overflow-hidden flex-shrink-0 border border-border/50 ${(!item.colorClass?.startsWith('#') && !item.colorClass?.startsWith('rgb')) ? (item.colorClass || '') : ''}`}
+                  style={(item.colorClass?.startsWith('#') || item.colorClass?.startsWith('rgb')) ? { color: item.colorClass } : undefined}
+                >
+                  <IconRenderer icon={resolveIcon(item)} size={28} />
                 </div>
                 <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button onClick={() => openEdit(item)} className="w-7 h-7 rounded-md hover:bg-accent flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors">
@@ -180,6 +192,7 @@ export function SocialMediaPage() {
               </button>
             </div>
             <div className="space-y-3">
+              {/* Platform Name */}
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1">Platform Name <span className="text-red-500">*</span></label>
                 <input
@@ -191,25 +204,47 @@ export function SocialMediaPage() {
                 />
                 <FieldError msg={errors.platform} />
               </div>
+
+              {/* Icon */}
               <div>
-                <label className="block text-sm font-medium text-foreground mb-1">Image URL <span className="text-red-500">*</span></label>
+                <label className="block text-sm font-medium text-foreground mb-1">
+                  Icon <span className="text-xs font-normal text-muted-foreground">(FontAwesome HTML, React Icon name, or Image URL)</span>
+                </label>
                 <input
-                  type="url"
-                  value={form.image}
-                  onChange={(e) => { setForm({ ...form, image: e.target.value }); if (errors.image) setErrors({ ...errors, image: '' }); }}
-                  placeholder="https://cdn.example.com/github.png"
-                  className={`w-full px-3 py-2 text-sm bg-input-background border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-foreground placeholder:text-muted-foreground ${errors.image ? 'border-red-500' : 'border-border'}`}
+                  type="text"
+                  value={form.icon}
+                  onChange={(e) => setForm({ ...form, icon: e.target.value })}
+                  placeholder='<i class="fa-brands fa-github"></i> or FaGithub or https://...'
+                  className="w-full px-3 py-2 text-sm bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-foreground placeholder:text-muted-foreground"
                 />
-                <FieldError msg={errors.image} />
               </div>
-              {form.image && /^https?:\/\/.+/.test(form.image) && (
-                <div className="flex items-center gap-3 p-3 bg-accent rounded-lg border border-border/50">
-                  <div className="w-12 h-12 rounded-lg bg-background flex items-center justify-center border border-border/30 shadow-sm">
-                    <img src={form.image} alt="preview" className="w-8 h-8 object-contain" />
+
+              {/* Color Class */}
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1 text-xs">Color (Tailwind Class or Hex)</label>
+                <input
+                  type="text"
+                  value={form.colorClass}
+                  onChange={(e) => setForm({ ...form, colorClass: e.target.value })}
+                  placeholder="e.g. text-blue-500 or #3b82f6"
+                  className="w-full px-3 py-2 text-sm bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-foreground placeholder:text-muted-foreground"
+                />
+              </div>
+
+              {/* Icon Preview */}
+              {(form.icon || form.colorClass) && (
+                <div className="flex flex-col items-center gap-3 p-3 bg-accent rounded-lg border border-border/50">
+                  <div
+                    className={`w-12 h-12 rounded-lg bg-background flex items-center justify-center shadow-sm ${(!form.colorClass?.startsWith('#') && !form.colorClass?.startsWith('rgb')) ? form.colorClass : ''}`}
+                    style={(form.colorClass?.startsWith('#') || form.colorClass?.startsWith('rgb')) ? { color: form.colorClass } : undefined}
+                  >
+                    <IconRenderer icon={form.icon} size={32} />
                   </div>
-                  <span className="text-xs text-muted-foreground">Image preview — {form.platform || 'Platform'}</span>
+                  <span className="text-xs text-muted-foreground font-medium">Icon preview — {form.platform || 'Platform'}</span>
                 </div>
               )}
+
+              {/* Profile Link */}
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1">Profile Link <span className="text-red-500">*</span></label>
                 <input
@@ -221,6 +256,8 @@ export function SocialMediaPage() {
                 />
                 <FieldError msg={errors.link} />
               </div>
+
+              {/* Display Order */}
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1">Display Order</label>
                 <input

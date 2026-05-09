@@ -133,19 +133,7 @@ export default function Home() {
                 </NavLink>
               </div>
 
-              {/* Stats */}
-              <div className="flex gap-6 sm:gap-8 pt-6 sm:pt-8 border-t border-border/50 justify-center lg:justify-start">
-                {[
-                  { value: "5+", label: "Years Exp" },
-                  { value: "30+", label: "Projects" },
-                  { value: "15+", label: "Clients" },
-                ].map((stat) => (
-                  <div key={stat.label} className="space-y-1 text-center lg:text-left">
-                    <p className="text-2xl sm:text-3xl font-bold text-foreground">{stat.value}</p>
-                    <p className="text-xs sm:text-sm text-muted-foreground">{stat.label}</p>
-                  </div>
-                ))}
-              </div>
+
             </motion.div>
 
             {/* ── Right: Premium Profile Image ── */}

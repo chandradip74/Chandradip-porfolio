@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { NavLink } from "react-router";
-import { Mail } from "lucide-react";
+
 import { api } from "../lib/api";
+import { IconRenderer } from "./ui/IconRenderer";
 
 export default function Footer() {
   const [profile, setProfile] = useState<any>(null);
@@ -67,49 +68,33 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Connect — Social Media Images */}
+          {/* Connect — Social Media Icons */}
           <div className="space-y-4">
             <h4 className="text-sm font-semibold tracking-widest uppercase text-muted-foreground/70">
               Connect
             </h4>
             {socialMedia.length > 0 ? (
               <div className="flex flex-wrap items-center gap-3">
-                {socialMedia.map((item) => (
-                  <a
-                    key={item._id}
-                    href={item.link}
-                    aria-label={item.platform}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-200 hover:scale-110 border border-border bg-muted/30 hover:bg-muted overflow-hidden"
-                    title={item.platform}
-                  >
-                    <img
-                      src={item.image}
-                      alt={item.platform}
-                      className="w-6 h-6 object-contain"
-                    />
-                  </a>
-                ))}
-                <a
-                  href={`mailto:${displayEmail}`}
-                  aria-label="Email"
-                  className="w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-200 hover:scale-110 border border-border text-muted-foreground bg-muted/30 hover:bg-muted hover:text-foreground"
-                >
-                  <Mail size={16} />
-                </a>
+                {socialMedia.map((item) => {
+                  const iconSrc = item.icon || item.image || '';
+                  const isHex = item.colorClass?.startsWith('#') || item.colorClass?.startsWith('rgb');
+                  return (
+                    <a
+                      key={item._id}
+                      href={item.link}
+                      aria-label={item.platform}
+                      target="_blank"
+                      rel="noreferrer"
+                      className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-200 hover:scale-110 border border-border bg-muted/30 hover:bg-muted overflow-hidden ${!isHex ? (item.colorClass || '') : ''}`}
+                      style={isHex ? { color: item.colorClass } : undefined}
+                      title={item.platform}
+                    >
+                      <IconRenderer icon={iconSrc} size={20} />
+                    </a>
+                  );
+                })}
               </div>
-            ) : (
-              <div className="flex items-center gap-3">
-                <a
-                  href={`mailto:${displayEmail}`}
-                  aria-label="Email"
-                  className="w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-200 hover:scale-110 border border-border text-muted-foreground bg-muted/30 hover:bg-muted hover:text-foreground"
-                >
-                  <Mail size={16} />
-                </a>
-              </div>
-            )}
+            ) : null}
             <p className="text-sm text-muted-foreground break-all">{displayEmail}</p>
           </div>
         </div>

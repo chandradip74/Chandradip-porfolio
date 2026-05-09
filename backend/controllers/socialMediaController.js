@@ -7,8 +7,8 @@ export const getSocialMedia = asyncHandler(async (req, res) => {
 });
 
 export const createSocialMedia = asyncHandler(async (req, res) => {
-  const { platform, image, link, order } = req.body;
-  const item = new SocialMedia({ platform, image, link, order: order || 0 });
+  const { platform, image, icon, colorClass, link, order } = req.body;
+  const item = new SocialMedia({ platform, image: image || '', icon: icon || '', colorClass: colorClass || '#6366f1', link, order: order || 0 });
   const created = await item.save();
   res.status(201).json(created);
 });
@@ -16,9 +16,11 @@ export const createSocialMedia = asyncHandler(async (req, res) => {
 export const updateSocialMedia = asyncHandler(async (req, res) => {
   const item = await SocialMedia.findById(req.params.id);
   if (item) {
-    const { platform, image, link, order } = req.body;
+    const { platform, image, icon, colorClass, link, order } = req.body;
     item.platform = platform || item.platform;
-    item.image = image || item.image;
+    item.image = image !== undefined ? image : item.image;
+    item.icon = icon !== undefined ? icon : item.icon;
+    item.colorClass = colorClass !== undefined ? colorClass : item.colorClass;
     item.link = link || item.link;
     item.order = order !== undefined ? order : item.order;
     const updated = await item.save();
