@@ -71,24 +71,24 @@ export default function Home() {
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[400px] h-[400px] sm:w-[600px] sm:h-[500px] lg:w-[800px] lg:h-[600px] bg-primary/20 blur-[120px] rounded-full pointer-events-none" />
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 w-full pt-12 pb-20">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
-            {/* ── Left: Text content ── */}
+          <div className="flex flex-col items-center justify-center text-center gap-10">
+            {/* ── Center: Text content ── */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
-              className="space-y-6 sm:space-y-8 order-2 lg:order-1 text-center lg:text-left"
+              className="flex flex-col items-center space-y-6 sm:space-y-8"
             >
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-muted/50 backdrop-blur-sm text-xs sm:text-sm font-medium text-muted-foreground">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-border bg-muted/50 backdrop-blur-sm text-xs sm:text-sm font-medium text-muted-foreground">
                 <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
                 Available for New Opportunities
               </div>
 
-              <div className="space-y-3 sm:space-y-4">
-                <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight leading-[1.1]">
+              <div className="space-y-4 sm:space-y-6 flex flex-col items-center">
+                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.1]">
                   Hello, I'm
                   <br />
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-primary/80 to-primary/60">
+                  <span className="italic text-transparent bg-clip-text bg-gradient-to-r from-primary via-primary/80 to-primary/60">
                     {profileLoading ? (
                       <span className="inline-block w-40 sm:w-48 h-12 sm:h-14 bg-muted rounded-xl animate-pulse align-middle" />
                     ) : (
@@ -97,14 +97,14 @@ export default function Home() {
                   </span>
                 </h1>
 
-                <div className="text-lg sm:text-xl lg:text-2xl font-medium text-foreground h-8 flex items-center gap-2 justify-center lg:justify-start">
+                <div className="text-xl sm:text-2xl lg:text-3xl font-medium text-foreground h-8 flex items-center gap-2 justify-center">
                   <span>I am a</span>
                   <span className="text-primary font-bold">
                     <Typewriter
                       words={displayRoles}
                       loop={true}
                       cursor
-                      cursorStyle='_'
+                      cursorStyle='|'
                       typeSpeed={70}
                       deleteSpeed={50}
                       delaySpeed={1500}
@@ -112,114 +112,113 @@ export default function Home() {
                   </span>
                 </div>
 
-                <p className="text-base sm:text-lg text-muted-foreground max-w-lg mx-auto lg:mx-0 leading-relaxed mt-2">
+                <p className="text-base sm:text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed mt-4">
                   {displayDescription}
                 </p>
               </div>
 
-              <div className="flex flex-wrap items-center gap-3 sm:gap-4 justify-center lg:justify-start">
+              <div className="flex flex-wrap items-center gap-4 sm:gap-6 justify-center mt-4">
                 <NavLink
                   to="/projects"
-                  className="group flex items-center gap-2 px-5 sm:px-6 py-3 sm:py-3.5 rounded-xl font-medium bg-primary text-primary-foreground hover:opacity-90 transition-all shadow-lg hover:shadow-primary/25 text-sm sm:text-base"
+                  className="flex items-center justify-center min-w-[160px] px-6 py-3.5 rounded-lg font-medium bg-foreground text-background hover:bg-foreground/90 transition-all text-sm sm:text-base"
                 >
                   View My Work
-                  <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
                 </NavLink>
                 <NavLink
                   to="/contact"
-                  className="flex items-center gap-2 px-5 sm:px-6 py-3 sm:py-3.5 rounded-xl font-medium border border-border hover:bg-muted transition-colors text-sm sm:text-base"
+                  className="flex items-center justify-center min-w-[160px] px-6 py-3.5 rounded-lg font-medium bg-background text-foreground border border-border hover:bg-muted transition-colors text-sm sm:text-base"
                 >
                   Hire Me
                 </NavLink>
               </div>
-
-
             </motion.div>
 
-            {/* ── Right: Premium Profile Image ── */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.85 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.9, delay: 0.2, type: "spring", bounce: 0.3 }}
-              className="order-1 lg:order-2 flex justify-center lg:justify-end relative"
-            >
-              {/* Outer glow ring */}
-              <div className="relative">
-                {/* Animated rotating ring */}
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                  className="absolute -inset-4 rounded-[2.5rem] border border-primary/20 border-dashed pointer-events-none"
-                />
-                {/* Second ring */}
-                <motion.div
-                  animate={{ rotate: -360 }}
-                  transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-                  className="absolute -inset-8 rounded-[3rem] border border-primary/10 border-dashed pointer-events-none"
-                />
+            {/* ── Right: Premium Profile Image (Disabled temporarily) ── */}
+            {false && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.85 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.9, delay: 0.2, type: "spring", bounce: 0.3 }}
+                className="flex justify-center relative"
+              >
+                {/* Outer glow ring */}
+                <div className="relative">
+                  {/* Animated rotating ring */}
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                    className="absolute -inset-4 rounded-[2.5rem] border border-primary/20 border-dashed pointer-events-none"
+                  />
+                  {/* Second ring */}
+                  <motion.div
+                    animate={{ rotate: -360 }}
+                    transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
+                    className="absolute -inset-8 rounded-[3rem] border border-primary/10 border-dashed pointer-events-none"
+                  />
 
-                {/* Blob glow behind image */}
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/30 via-primary/10 to-transparent blur-2xl rounded-3xl scale-110 pointer-events-none" />
+                  {/* Blob glow behind image */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/30 via-primary/10 to-transparent blur-2xl rounded-3xl scale-110 pointer-events-none" />
 
-                {/* Profile image card */}
-                <div className="relative w-64 h-[360px] sm:w-72 sm:h-[420px] lg:w-[340px] lg:h-[460px] rounded-3xl overflow-hidden border-2 border-primary/20 shadow-2xl shadow-primary/10">
-                  {profileLoading ? (
-                    <div className="w-full h-full bg-muted animate-pulse" />
-                  ) : (
-                    <>
-                      <ImageWithFallback
-                        src={displayImage}
-                        alt={displayName || "Profile"}
-                        className="w-full h-full object-cover object-top"
-                      />
-                      {/* Gradient overlay */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-background/70 via-transparent to-transparent" />
-                    </>
-                  )}
+                  {/* Profile image card */}
+                  <div className="relative w-64 h-[360px] sm:w-72 sm:h-[420px] lg:w-[340px] lg:h-[460px] rounded-3xl overflow-hidden border-2 border-primary/20 shadow-2xl shadow-primary/10">
+                    {profileLoading ? (
+                      <div className="w-full h-full bg-muted animate-pulse" />
+                    ) : (
+                      <>
+                        <ImageWithFallback
+                          src={displayImage}
+                          alt={displayName || "Profile"}
+                          className="w-full h-full object-cover object-top"
+                        />
+                        {/* Gradient overlay */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-background/70 via-transparent to-transparent" />
+                      </>
+                    )}
+                  </div>
+
+                  {/* Floating badge — Available */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.8, duration: 0.5 }}
+                    className="absolute -bottom-4 -left-4 sm:-bottom-5 sm:-left-6 flex items-center gap-2 px-3 sm:px-4 py-2 rounded-2xl bg-background/90 backdrop-blur-md border border-border shadow-xl text-xs sm:text-sm font-medium"
+                  >
+                    <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse flex-shrink-0" />
+                    Open to Work
+                  </motion.div>
+
+                  {/* Floating badge — Code */}
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 1.0, duration: 0.5 }}
+                    className="absolute -top-4 -right-4 sm:-top-5 sm:-right-6 flex items-center gap-2 px-3 sm:px-4 py-2 rounded-2xl bg-primary text-primary-foreground backdrop-blur-md shadow-xl text-xs sm:text-sm font-medium"
+                  >
+                    <Code2 size={14} className="flex-shrink-0" />
+                    Full Stack Dev
+                  </motion.div>
+
+                  {/* Floating sparkle */}
+                  <motion.div
+                    animate={{ y: [0, -8, 0], rotate: [0, 10, -10, 0] }}
+                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                    className="absolute top-1/2 -right-8 sm:-right-10 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary border border-primary/20 shadow"
+                  >
+                    <Sparkles size={16} />
+                  </motion.div>
+
+                  {/* Floating location */}
+                  <motion.div
+                    animate={{ y: [0, 6, 0] }}
+                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                    className="absolute top-1/4 -left-8 sm:-left-10 flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-background/90 backdrop-blur-md border border-border shadow text-xs font-medium text-muted-foreground"
+                  >
+                    <MapPin size={11} className="text-primary flex-shrink-0" />
+                    India
+                  </motion.div>
                 </div>
-
-                {/* Floating badge — Available */}
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.8, duration: 0.5 }}
-                  className="absolute -bottom-4 -left-4 sm:-bottom-5 sm:-left-6 flex items-center gap-2 px-3 sm:px-4 py-2 rounded-2xl bg-background/90 backdrop-blur-md border border-border shadow-xl text-xs sm:text-sm font-medium"
-                >
-                  <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse flex-shrink-0" />
-                  Open to Work
-                </motion.div>
-
-                {/* Floating badge — Code */}
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 1.0, duration: 0.5 }}
-                  className="absolute -top-4 -right-4 sm:-top-5 sm:-right-6 flex items-center gap-2 px-3 sm:px-4 py-2 rounded-2xl bg-primary text-primary-foreground backdrop-blur-md shadow-xl text-xs sm:text-sm font-medium"
-                >
-                  <Code2 size={14} className="flex-shrink-0" />
-                  Full Stack Dev
-                </motion.div>
-
-                {/* Floating sparkle */}
-                <motion.div
-                  animate={{ y: [0, -8, 0], rotate: [0, 10, -10, 0] }}
-                  transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                  className="absolute top-1/2 -right-8 sm:-right-10 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary border border-primary/20 shadow"
-                >
-                  <Sparkles size={16} />
-                </motion.div>
-
-                {/* Floating location */}
-                <motion.div
-                  animate={{ y: [0, 6, 0] }}
-                  transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-                  className="absolute top-1/4 -left-8 sm:-left-10 flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-background/90 backdrop-blur-md border border-border shadow text-xs font-medium text-muted-foreground"
-                >
-                  <MapPin size={11} className="text-primary flex-shrink-0" />
-                  India
-                </motion.div>
-              </div>
-            </motion.div>
+              </motion.div>
+            )}
           </div>
         </div>
 
