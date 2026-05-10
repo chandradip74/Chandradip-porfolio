@@ -61,7 +61,7 @@ export function TopProgressBar() {
 
       {/* Floating elegant spinner in bottom-right for extra visual feedback */}
       <div className="fixed bottom-6 right-6 z-[9999] pointer-events-none animate-in fade-in zoom-in duration-300">
-        <div className="bg-background/80 backdrop-blur-md border border-border/50 shadow-xl p-3 rounded-full">
+        <div className="bg-background border border-border/50 shadow-xl p-3 rounded-full">
           <Loader2 className="w-5 h-5 text-primary animate-spin" />
         </div>
       </div>

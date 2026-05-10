@@ -84,7 +84,7 @@ export function ProcessPage() {
   return (
     <div className="max-w-3xl space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-foreground text-xl font-semibold">My Process</h1>
           <p className="text-sm text-muted-foreground mt-0.5">
@@ -93,7 +93,7 @@ export function ProcessPage() {
         </div>
         <button
           onClick={openAdd}
-          className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
+          className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:opacity-90 transition-opacity whitespace-nowrap"
         >
           <Plus className="w-4 h-4" /> Add Step
         </button>
@@ -126,7 +126,7 @@ export function ProcessPage() {
                 <p className="text-xs text-muted-foreground leading-relaxed mt-0.5 line-clamp-2">{entry.description}</p>
               </div>
 
-              <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+              <div className="flex gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity flex-shrink-0">
                 <button
                   onClick={() => openEdit(entry)}
                   className="w-8 h-8 rounded-lg hover:bg-accent flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"

@@ -55,7 +55,7 @@ export default function Services() {
           transition={{ duration: 0.8 }}
           className="relative max-w-7xl mx-auto text-center space-y-4 sm:space-y-6 z-10"
         >
-          <span className="inline-block text-xs font-semibold tracking-widest uppercase px-4 py-1.5 rounded-full border border-primary-foreground/20 bg-primary-foreground/10 text-primary-foreground/80 backdrop-blur-md">
+          <span className="inline-block text-xs font-semibold tracking-widest uppercase px-4 py-1.5 rounded-full border border-primary-foreground/20 bg-primary-foreground/10 text-primary-foreground/80 ">
             What I Offer
           </span>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight text-primary-foreground">
@@ -69,7 +69,7 @@ export default function Services() {
       </section>
 
       {/* Search bar */}
-      <section className="py-6 sm:py-8 px-4 sm:px-6 lg:px-12 sticky top-16 sm:top-20 z-30 bg-background/80 backdrop-blur-md border-b border-border">
+      <section className="py-6 sm:py-8 px-4 sm:px-6 lg:px-12 sticky top-16 sm:top-20 z-30 bg-background border-b border-border">
         <div className="max-w-7xl mx-auto flex justify-center">
           <div className="relative w-full max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
@@ -255,7 +255,7 @@ export default function Services() {
           viewport={{ once: true }}
           className="max-w-3xl mx-auto text-center space-y-6 sm:space-y-8 relative z-10"
         >
-          <div className="inline-flex p-4 rounded-2xl bg-background/10 backdrop-blur-md mb-4">
+          <div className="inline-flex p-4 rounded-2xl bg-muted mb-4">
             <Zap size={28} className="text-primary-foreground" />
           </div>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold tracking-tight">
@@ -266,7 +266,7 @@ export default function Services() {
           </p>
           <NavLink
             to="/contact"
-            className="group inline-flex items-center gap-3 px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-semibold bg-background text-foreground hover:bg-background/90 transition-all shadow-lg hover:shadow-background/20 hover:-translate-y-1 text-sm sm:text-base"
+            className="group inline-flex items-center gap-3 px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-semibold bg-background text-foreground hover:bg-background transition-all shadow-lg hover:shadow-background/20 hover:-translate-y-1 text-sm sm:text-base"
           >
             Let's Work Together
             <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />

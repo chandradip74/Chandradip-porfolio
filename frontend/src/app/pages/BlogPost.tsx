@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, NavLink } from "react-router";
 import { motion } from "motion/react";
-import { ArrowLeft, Clock, Tag, Calendar, BookOpen, ChevronRight } from "lucide-react";
+import { ArrowLeft, Clock, Tag, Calendar, BookOpen, ChevronRight, Clipboard, Check } from "lucide-react";
 import { api } from "../lib/api";
 
 interface Blog {
@@ -27,7 +27,34 @@ const CATEGORY_COLORS: Record<string, string> = {
   "Open Source":"bg-orange-500/10 text-orange-600 dark:text-orange-400",
 };
 
-/* ─── Lightweight content renderer ───────────────────────────────────────── */
+/* ── Code Block Component ────────────────────────────────────────────────── */
+function CodeBlock({ lang, codeLines }: { lang: string, codeLines: string[] }) {
+  const [copied, setCopied] = useState(false);
+  const codeString = codeLines.join("\n");
+  
+  const handleCopy = () => {
+    navigator.clipboard.writeText(codeString);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="relative my-8 rounded-xl overflow-hidden border border-border group bg-[#161b22] dark:bg-[#161b22]">
+      <button 
+        onClick={handleCopy}
+        className="absolute top-3 right-3 p-2 rounded-md bg-[#21262d] text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity hover:text-foreground hover:bg-[#30363d] border border-border/50"
+        title="Copy code"
+      >
+        {copied ? <Check size={16} className="text-green-400" /> : <Clipboard size={16} />}
+      </button>
+      <pre className="overflow-x-auto p-5 text-[#e6edf3] text-sm leading-relaxed font-mono">
+        <code>{codeString}</code>
+      </pre>
+    </div>
+  );
+}
+
+/* ── Lightweight content renderer ───────────────────────────────────────── */
 function renderContent(raw: string) {
   const lines = raw.split("\n");
   const elements: React.ReactNode[] = [];
@@ -48,19 +75,7 @@ function renderContent(raw: string) {
       }
       i++; // skip closing ```
       elements.push(
-        <div key={keyIdx++} className="my-6 rounded-xl overflow-hidden border border-border">
-          <div className="flex items-center justify-between px-4 py-2.5 bg-muted/80 border-b border-border">
-            <span className="text-xs font-mono text-muted-foreground uppercase tracking-widest">{lang}</span>
-            <div className="flex gap-1.5">
-              <span className="w-3 h-3 rounded-full bg-red-400/60" />
-              <span className="w-3 h-3 rounded-full bg-yellow-400/60" />
-              <span className="w-3 h-3 rounded-full bg-green-400/60" />
-            </div>
-          </div>
-          <pre className="overflow-x-auto p-5 bg-[#0d1117] dark:bg-[#0d1117] text-[#e6edf3] text-sm leading-relaxed font-mono">
-            <code>{codeLines.join("\n")}</code>
-          </pre>
-        </div>
+        <CodeBlock key={keyIdx++} lang={lang} codeLines={codeLines} />
       );
       continue;
     }
@@ -140,6 +155,21 @@ function renderContent(raw: string) {
       i++; continue;
     }
 
+    // ── Image ─────────────────────────────────────────────────────────────
+    // Format: ![alt text](image_url)
+    const imgMatch = line.trim().match(/^!\[(.*?)\]\((.*?)\)$/);
+    if (imgMatch) {
+      const alt = imgMatch[1];
+      const src = imgMatch[2];
+      elements.push(
+        <div key={keyIdx++} className="my-8 flex flex-col items-center">
+          <img src={src} alt={alt} className="max-w-full rounded-sm object-contain bg-muted/20" />
+          {alt && <span className="mt-3 text-sm font-bold text-foreground text-center">{alt}</span>}
+        </div>
+      );
+      i++; continue;
+    }
+
     // ── Empty line → spacer ─────────────────────────────────────────────────
     if (line.trim() === "") {
       elements.push(<div key={keyIdx++} className="my-2" />);
@@ -215,21 +245,13 @@ export default function BlogPost() {
   );
 
   return (
-    <div className="bg-background text-foreground min-h-screen">
-      {/* ── Cover image hero ── */}
-      {blog.coverImage && (
-        <div className="relative w-full h-[40vh] sm:h-[50vh] overflow-hidden">
-          <img src={blog.coverImage} alt={blog.title} className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-b from-background/20 via-transparent to-background" />
-        </div>
-      )}
-
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="bg-background text-foreground min-h-screen pb-20">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pt-24">
         {/* ── Breadcrumb ── */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className={`flex items-center gap-2 text-sm text-muted-foreground ${blog.coverImage ? "-mt-8 relative z-10" : "pt-24"}`}
+          className="flex items-center gap-2 text-sm text-muted-foreground"
         >
           <NavLink to="/blog" className="hover:text-foreground transition-colors flex items-center gap-1">
             <ArrowLeft size={14} /> Blog
@@ -243,10 +265,22 @@ export default function BlogPost() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="mt-6 mb-10 space-y-5"
+          className="mt-8 mb-10 flex flex-col items-center text-center space-y-6"
         >
+          {/* Cover image (now centered like a standard content image) */}
+          {blog.coverImage && (
+            <div className="w-full flex justify-center">
+              <img src={blog.coverImage} alt={blog.title} className="max-w-full rounded-sm object-contain" />
+            </div>
+          )}
+
+          {/* Title */}
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground leading-tight max-w-2xl mt-4">
+            {blog.title}
+          </h1>
+
           {/* Category + meta row */}
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap justify-center items-center gap-3">
             <span className={`text-xs font-semibold px-3 py-1 rounded-full ${CATEGORY_COLORS[blog.category] || CATEGORY_COLORS.General}`}>
               {blog.category}
             </span>
@@ -259,16 +293,12 @@ export default function BlogPost() {
             </span>
           </div>
 
-          {/* Title */}
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground leading-tight">
-            {blog.title}
-          </h1>
-
           {/* Excerpt */}
-          <p className="text-lg text-muted-foreground leading-relaxed border-l-4 border-primary pl-4 italic">
+          <p className="text-lg text-muted-foreground leading-relaxed max-w-2xl">
             {blog.excerpt}
           </p>
         </motion.header>
+
 
         {/* ── Content ── */}
         <motion.article

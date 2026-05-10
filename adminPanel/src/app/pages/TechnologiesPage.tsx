@@ -138,7 +138,6 @@ export function TechnologiesPage() {
                 </div>
               </div>
               <p className="text-sm font-medium text-foreground">{tech.technologyName}</p>
-              {tech.iconPath && <p className="text-xs text-muted-foreground mt-0.5 truncate">{tech.iconPath}</p>}
             </div>
           ))}
           {filtered.length === 0 && !loading && (

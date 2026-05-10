@@ -79,7 +79,7 @@ export default function Home() {
               transition={{ duration: 0.8 }}
               className="flex flex-col items-center space-y-6 sm:space-y-8"
             >
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-border bg-muted/50 backdrop-blur-sm text-xs sm:text-sm font-medium text-muted-foreground">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-border bg-muted text-xs sm:text-sm font-medium text-muted-foreground">
                 <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
                 Available for New Opportunities
               </div>
@@ -101,6 +101,7 @@ export default function Home() {
                   <span>I am a</span>
                   <span className="text-primary font-bold">
                     <Typewriter
+                      key={displayRoles.join(',')}
                       words={displayRoles}
                       loop={true}
                       cursor
@@ -181,7 +182,7 @@ export default function Home() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.8, duration: 0.5 }}
-                    className="absolute -bottom-4 -left-4 sm:-bottom-5 sm:-left-6 flex items-center gap-2 px-3 sm:px-4 py-2 rounded-2xl bg-background/90 backdrop-blur-md border border-border shadow-xl text-xs sm:text-sm font-medium"
+                    className="absolute -bottom-4 -left-4 sm:-bottom-5 sm:-left-6 flex items-center gap-2 px-3 sm:px-4 py-2 rounded-2xl bg-background border border-border shadow-xl text-xs sm:text-sm font-medium"
                   >
                     <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse flex-shrink-0" />
                     Open to Work
@@ -192,7 +193,7 @@ export default function Home() {
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 1.0, duration: 0.5 }}
-                    className="absolute -top-4 -right-4 sm:-top-5 sm:-right-6 flex items-center gap-2 px-3 sm:px-4 py-2 rounded-2xl bg-primary text-primary-foreground backdrop-blur-md shadow-xl text-xs sm:text-sm font-medium"
+                    className="absolute -top-4 -right-4 sm:-top-5 sm:-right-6 flex items-center gap-2 px-3 sm:px-4 py-2 rounded-2xl bg-primary text-primary-foreground  shadow-xl text-xs sm:text-sm font-medium"
                   >
                     <Code2 size={14} className="flex-shrink-0" />
                     Full Stack Dev
@@ -211,7 +212,7 @@ export default function Home() {
                   <motion.div
                     animate={{ y: [0, 6, 0] }}
                     transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-                    className="absolute top-1/4 -left-8 sm:-left-10 flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-background/90 backdrop-blur-md border border-border shadow text-xs font-medium text-muted-foreground"
+                    className="absolute top-1/4 -left-8 sm:-left-10 flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-background border border-border shadow text-xs font-medium text-muted-foreground"
                   >
                     <MapPin size={11} className="text-primary flex-shrink-0" />
                     India
@@ -479,7 +480,7 @@ export default function Home() {
               target={cvUrl !== "#" ? "_blank" : undefined}
               rel="noreferrer"
               download={cvUrl !== "#"}
-              className={`group inline-flex items-center gap-3 px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-semibold bg-background text-foreground hover:bg-background/90 transition-all shadow-lg text-sm sm:text-base ${cvUrl === "#" ? "opacity-60 cursor-not-allowed" : ""}`}
+              className={`group inline-flex items-center gap-3 px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-semibold bg-background text-foreground hover:bg-background transition-all shadow-lg text-sm sm:text-base ${cvUrl === "#" ? "opacity-60 cursor-not-allowed" : ""}`}
             >
               <Download size={20} className="group-hover:-translate-y-1 transition-transform" />
               {cvUrl === "#" ? "CV Not Uploaded Yet" : "Download CV"}

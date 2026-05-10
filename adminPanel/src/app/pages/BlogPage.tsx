@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import {
   Plus, Pencil, Trash2, X, Save, Search, List, Loader2,
-  Upload, Eye, EyeOff, Clock, Tag, BookOpen,
+  Upload, Eye, EyeOff, Clock, Tag, BookOpen, ChevronUp, ChevronDown, AlignLeft, Image as ImageIcon, Code, Heading1, ListOrdered
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { api } from '../lib/api';
@@ -20,7 +20,66 @@ interface Blog {
   createdAt: string;
 }
 
-const CATEGORIES = ['General', 'Tech', 'Tutorial', 'Career', 'Design', 'Open Source'];
+const CATEGORIES = ['General', 'Tech', 'Tutorial', 'Career', 'Design', 'Open Source', 'Case Study'];
+
+type BlockType = 'heading' | 'paragraph' | 'code' | 'image' | 'list';
+interface ContentBlock {
+  id: string;
+  type: BlockType;
+  value: string;
+  extra: string;
+}
+
+const parseMarkdownToBlocks = (md: string) => {
+  if (!md) return [{ id: Date.now().toString(), type: 'paragraph' as BlockType, value: '', extra: '' }];
+  const blks: ContentBlock[] = [];
+  const lines = md.split('\n');
+  let i = 0;
+  while (i < lines.length) {
+    const line = lines[i];
+    if (line.startsWith('```')) {
+      const lang = line.slice(3).trim();
+      const codeLines = [];
+      i++;
+      while (i < lines.length && !lines[i].startsWith('```')) {
+        codeLines.push(lines[i]);
+        i++;
+      }
+      blks.push({ id: Math.random().toString(), type: 'code', value: codeLines.join('\n'), extra: lang });
+    } else if (line.startsWith('### ')) {
+      blks.push({ id: Math.random().toString(), type: 'heading', value: line.slice(4), extra: '' });
+    } else if (line.startsWith('## ')) {
+      blks.push({ id: Math.random().toString(), type: 'heading', value: line.slice(3), extra: '' });
+    } else if (line.startsWith('# ')) {
+      blks.push({ id: Math.random().toString(), type: 'heading', value: line.slice(2), extra: '' });
+    } else if (line.match(/^!\[(.*?)\]\((.*?)\)$/)) {
+      const match = line.match(/^!\[(.*?)\]\((.*?)\)$/)!;
+      blks.push({ id: Math.random().toString(), type: 'image', value: match[1], extra: match[2] });
+    } else if (line.startsWith('- ') || line.startsWith('* ')) {
+      const listLines = [];
+      while (i < lines.length && (lines[i].startsWith('- ') || lines[i].startsWith('* '))) {
+        listLines.push(lines[i].slice(2));
+        i++;
+      }
+      blks.push({ id: Math.random().toString(), type: 'list', value: listLines.join('\n'), extra: '' });
+      continue;
+    } else if (line.trim() === '---' || line.trim() === '') {
+       // ignore
+    } else {
+      const pLines = [];
+      while (i < lines.length && lines[i].trim() !== '' && !lines[i].startsWith('```') && !lines[i].startsWith('#') && !lines[i].match(/^!\[(.*?)\]\((.*?)\)$/) && !lines[i].startsWith('- ') && !lines[i].startsWith('* ')) {
+        pLines.push(lines[i]);
+        i++;
+      }
+      if (pLines.length > 0) {
+        blks.push({ id: Math.random().toString(), type: 'paragraph', value: pLines.join('\n'), extra: '' });
+        continue;
+      }
+    }
+    i++;
+  }
+  return blks.length ? blks : [{ id: Date.now().toString(), type: 'paragraph' as BlockType, value: '', extra: '' }];
+};
 
 export function BlogPage() {
   const [blogs, setBlogs] = useState<Blog[]>([]);
@@ -33,10 +92,11 @@ export function BlogPage() {
   const [tagInput, setTagInput] = useState('');
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState('');
+  const [blocks, setBlocks] = useState<ContentBlock[]>([]);
   const imageRef = useRef<HTMLInputElement>(null);
 
   const [form, setForm] = useState({
-    title: '', excerpt: '', content: '',
+    title: '', excerpt: '',
     category: 'General', tags: [] as string[],
     readTime: 5, published: false, coverImage: '',
   });
@@ -56,16 +116,44 @@ export function BlogPage() {
     b.category.toLowerCase().includes(search.toLowerCase())
   );
 
+  const blocksToMarkdown = (blks: ContentBlock[]) => {
+    return blks.map(b => {
+      switch (b.type) {
+        case 'heading': return `## ${b.value}\n`;
+        case 'paragraph': return `${b.value}\n`;
+        case 'code': return `\`\`\`${b.extra || 'js'}\n${b.value}\n\`\`\`\n`;
+        case 'image': return `![${b.value}](${b.extra})\n`;
+        case 'list': return b.value.split('\n').filter(x => x.trim()).map(l => `- ${l}`).join('\n') + '\n';
+        default: return b.value;
+      }
+    }).join('\n');
+  };
+
+  const addBlock = (type: BlockType) => setBlocks([...blocks, { id: Math.random().toString(), type, value: '', extra: '' }]);
+  const updateBlock = (id: string, updates: Partial<ContentBlock>) => setBlocks(blocks.map(b => b.id === id ? { ...b, ...updates } : b));
+  const removeBlock = (id: string) => setBlocks(blocks.filter(b => b.id !== id));
+  const moveBlock = (index: number, direction: 'up' | 'down') => {
+    const newBlocks = [...blocks];
+    if (direction === 'up' && index > 0) {
+      [newBlocks[index - 1], newBlocks[index]] = [newBlocks[index], newBlocks[index - 1]];
+    } else if (direction === 'down' && index < blocks.length - 1) {
+      [newBlocks[index + 1], newBlocks[index]] = [newBlocks[index], newBlocks[index + 1]];
+    }
+    setBlocks(newBlocks);
+  };
+
   const openAdd = () => {
     setEditing(null);
-    setForm({ title: '', excerpt: '', content: '', category: 'General', tags: [], readTime: 5, published: false, coverImage: '' });
+    setForm({ title: '', excerpt: '', category: 'General', tags: [], readTime: 5, published: false, coverImage: '' });
+    setBlocks([{ id: Date.now().toString(), type: 'heading', value: 'Introduction', extra: '' }, { id: (Date.now()+1).toString(), type: 'paragraph', value: '', extra: '' }]);
     setTagInput(''); setImageFile(null); setImagePreview('');
     setModalOpen(true);
   };
 
   const openEdit = (b: Blog) => {
     setEditing(b);
-    setForm({ title: b.title, excerpt: b.excerpt, content: b.content, category: b.category, tags: [...b.tags], readTime: b.readTime, published: b.published, coverImage: b.coverImage || '' });
+    setForm({ title: b.title, excerpt: b.excerpt, category: b.category, tags: [...b.tags], readTime: b.readTime, published: b.published, coverImage: b.coverImage || '' });
+    setBlocks(parseMarkdownToBlocks(b.content));
     setTagInput(''); setImageFile(null); setImagePreview(b.coverImage || '');
     setModalOpen(true);
   };
@@ -83,13 +171,15 @@ export function BlogPage() {
   const handleSave = async () => {
     if (!form.title.trim()) { toast.error('Title is required'); return; }
     if (!form.excerpt.trim()) { toast.error('Excerpt is required'); return; }
-    if (!form.content.trim()) { toast.error('Content is required'); return; }
+    const finalContent = blocksToMarkdown(blocks);
+    if (!finalContent.trim()) { toast.error('Content is required'); return; }
+    
     setSaving(true);
     try {
       const fd = new FormData();
       fd.append('title', form.title);
       fd.append('excerpt', form.excerpt);
-      fd.append('content', form.content);
+      fd.append('content', finalContent);
       fd.append('category', form.category);
       fd.append('tags', JSON.stringify(form.tags));
       fd.append('readTime', String(form.readTime));
@@ -181,8 +271,8 @@ export function BlogPage() {
                           : <div className="w-full h-full flex items-center justify-center"><BookOpen className="w-4 h-4 text-muted-foreground" /></div>}
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-foreground line-clamp-1">{blog.title}</p>
-                        <p className="text-xs text-muted-foreground hidden sm:block line-clamp-1">{blog.excerpt}</p>
+                        <p className="text-sm font-medium text-foreground line-clamp-1" title={blog.title}>{blog.title}</p>
+                        <p className="text-xs text-muted-foreground hidden sm:block line-clamp-1" title={blog.excerpt}>{blog.excerpt}</p>
                       </div>
                     </div>
                   </td>
@@ -242,22 +332,74 @@ export function BlogPage() {
                 <textarea value={form.excerpt} onChange={e => setForm({ ...form, excerpt: e.target.value })} rows={2} placeholder="Short summary…" className="w-full px-3 py-2 text-sm bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-foreground resize-none placeholder:text-muted-foreground" />
               </div>
 
-              {/* Content */}
+              {/* Dynamic Content Builder */}
               <div className="sm:col-span-2">
-                <label className="block text-sm font-medium text-foreground mb-1">Content *</label>
-                <textarea value={form.content} onChange={e => setForm({ ...form, content: e.target.value })} rows={10} placeholder="Write your blog post here…" className="w-full px-3 py-2 text-sm bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-foreground resize-y placeholder:text-muted-foreground font-mono" />
-                <div className="mt-1.5 p-3 bg-muted/50 rounded-lg border border-border/50 text-xs text-muted-foreground space-y-1">
-                  <p className="font-medium text-foreground/70 mb-1">✦ Formatting guide</p>
-                  <div className="grid grid-cols-2 gap-x-6 gap-y-0.5 font-mono">
-                    <span><span className="text-primary"># </span>Heading 1</span>
-                    <span><span className="text-primary">## </span>Heading 2</span>
-                    <span><span className="text-primary">**text**</span> → bold</span>
-                    <span><span className="text-primary">`code`</span> → inline code</span>
-                    <span><span className="text-primary">- item</span> → bullet list</span>
-                    <span><span className="text-primary">1. item</span> → numbered list</span>
-                    <span><span className="text-primary">&gt; text</span> → blockquote</span>
-                    <span><span className="text-primary">```js … ```</span> → code block</span>
-                  </div>
+                <label className="block text-sm font-medium text-foreground mb-2">Blog Content</label>
+                
+                <div className="space-y-4">
+                  {blocks.map((block, index) => (
+                    <div key={block.id} className="relative p-4 bg-muted/20 border border-border rounded-xl group transition-colors hover:border-primary/40">
+                      {/* Block Controls */}
+                      <div className="absolute -left-3 top-1/2 -translate-y-1/2 flex flex-col opacity-0 group-hover:opacity-100 transition-opacity gap-1">
+                        <button onClick={() => moveBlock(index, 'up')} disabled={index === 0} className="p-1 bg-card border border-border rounded-md shadow-sm hover:bg-accent disabled:opacity-30 disabled:hover:bg-card"><ChevronUp className="w-3 h-3 text-muted-foreground"/></button>
+                        <button onClick={() => moveBlock(index, 'down')} disabled={index === blocks.length - 1} className="p-1 bg-card border border-border rounded-md shadow-sm hover:bg-accent disabled:opacity-30 disabled:hover:bg-card"><ChevronDown className="w-3 h-3 text-muted-foreground"/></button>
+                      </div>
+
+                      <button onClick={() => removeBlock(block.id)} className="absolute top-2 right-2 p-1.5 rounded-md bg-destructive/10 text-destructive opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center hover:bg-destructive hover:text-white" title="Remove block">
+                        <X className="w-4 h-4" />
+                      </button>
+
+                      {block.type === 'heading' && (
+                        <div>
+                          <p className="text-xs font-semibold text-primary/70 mb-2 flex items-center gap-1.5"><Heading1 size={14}/> HEADING</p>
+                          <input value={block.value} onChange={e => updateBlock(block.id, { value: e.target.value })} placeholder="Section Title..." className="w-full bg-transparent border-b border-border focus:border-primary focus:outline-none py-1 text-lg font-bold text-foreground placeholder:font-normal placeholder:text-muted-foreground" />
+                        </div>
+                      )}
+
+                      {block.type === 'paragraph' && (
+                        <div>
+                          <p className="text-xs font-semibold text-primary/70 mb-2 flex items-center gap-1.5"><AlignLeft size={14}/> TEXT PARAGRAPH</p>
+                          <textarea value={block.value} onChange={e => updateBlock(block.id, { value: e.target.value })} placeholder="Write your content here... (Use **bold** for emphasis)" rows={3} className="w-full bg-input-background border border-border rounded-lg p-3 text-sm focus:outline-none focus:ring-1 focus:ring-primary resize-y text-foreground placeholder:text-muted-foreground" />
+                        </div>
+                      )}
+
+                      {block.type === 'image' && (
+                        <div>
+                          <p className="text-xs font-semibold text-primary/70 mb-2 flex items-center gap-1.5"><ImageIcon size={14}/> IMAGE</p>
+                          <div className="flex flex-col sm:flex-row gap-3">
+                            <input value={block.extra} onChange={e => updateBlock(block.id, { extra: e.target.value })} placeholder="Image URL..." className="flex-1 px-3 py-2 text-sm bg-input-background border border-border rounded-lg focus:outline-none text-foreground placeholder:text-muted-foreground" />
+                            <input value={block.value} onChange={e => updateBlock(block.id, { value: e.target.value })} placeholder="Caption text..." className="flex-1 px-3 py-2 text-sm bg-input-background border border-border rounded-lg focus:outline-none text-foreground placeholder:text-muted-foreground" />
+                          </div>
+                          {block.extra && <img src={block.extra} alt={block.value} className="mt-3 max-h-32 object-contain rounded-lg border border-border bg-black/20" />}
+                        </div>
+                      )}
+
+                      {block.type === 'code' && (
+                        <div>
+                          <div className="flex items-center gap-3 mb-2">
+                            <p className="text-xs font-semibold text-primary/70 flex items-center gap-1.5"><Code size={14}/> CODE BLOCK</p>
+                            <input value={block.extra} onChange={e => updateBlock(block.id, { extra: e.target.value })} placeholder="Language (e.g. js, python)" className="w-32 text-xs px-2 py-1 bg-input-background border border-border rounded focus:outline-none text-foreground" />
+                          </div>
+                          <textarea value={block.value} onChange={e => updateBlock(block.id, { value: e.target.value })} placeholder="Paste your code here..." rows={4} className="w-full bg-[#0d1117] text-[#e6edf3] border border-border rounded-lg p-3 font-mono text-sm focus:outline-none focus:ring-1 focus:ring-primary resize-y" />
+                        </div>
+                      )}
+
+                      {block.type === 'list' && (
+                        <div>
+                          <p className="text-xs font-semibold text-primary/70 mb-2 flex items-center gap-1.5"><ListOrdered size={14}/> BULLET LIST</p>
+                          <textarea value={block.value} onChange={e => updateBlock(block.id, { value: e.target.value })} placeholder="Item 1\nItem 2\nItem 3" rows={4} className="w-full bg-input-background border border-border rounded-lg p-3 text-sm focus:outline-none focus:ring-1 focus:ring-primary resize-y text-foreground placeholder:text-muted-foreground" />
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <button type="button" onClick={() => addBlock('heading')} className="px-3 py-1.5 bg-muted/50 hover:bg-muted rounded-lg text-xs font-medium border border-border flex items-center gap-1.5 text-foreground transition-colors"><Heading1 size={14}/> Add Heading</button>
+                  <button type="button" onClick={() => addBlock('paragraph')} className="px-3 py-1.5 bg-muted/50 hover:bg-muted rounded-lg text-xs font-medium border border-border flex items-center gap-1.5 text-foreground transition-colors"><AlignLeft size={14}/> Add Text</button>
+                  <button type="button" onClick={() => addBlock('image')} className="px-3 py-1.5 bg-muted/50 hover:bg-muted rounded-lg text-xs font-medium border border-border flex items-center gap-1.5 text-foreground transition-colors"><ImageIcon size={14}/> Add Image</button>
+                  <button type="button" onClick={() => addBlock('code')} className="px-3 py-1.5 bg-muted/50 hover:bg-muted rounded-lg text-xs font-medium border border-border flex items-center gap-1.5 text-foreground transition-colors"><Code size={14}/> Add Code</button>
+                  <button type="button" onClick={() => addBlock('list')} className="px-3 py-1.5 bg-muted/50 hover:bg-muted rounded-lg text-xs font-medium border border-border flex items-center gap-1.5 text-foreground transition-colors"><ListOrdered size={14}/> Add List</button>
                 </div>
               </div>
 

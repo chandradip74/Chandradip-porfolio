@@ -45,13 +45,14 @@ export const IconRenderer: React.FC<IconRendererProps> = ({ icon, className, siz
   return renderReactIcon(icon, className, size);
 };
 
+// Move AllIcons outside to avoid recreating it on every render
+const AllIcons: any = { 
+  ...FaIcons, ...SiIcons, ...IoIcons, ...Io5Icons, ...LuIcons, 
+  ...RiIcons, ...BiIcons, ...HiIcons, ...TbIcons, ...PiIcons, 
+  ...MdIcons, ...DiIcons 
+};
+
 const renderReactIcon = (iconName: string, className?: string, size?: number) => {
-  // Try to find the icon in different libraries
-  const AllIcons: any = { 
-    ...FaIcons, ...SiIcons, ...IoIcons, ...Io5Icons, ...LuIcons, 
-    ...RiIcons, ...BiIcons, ...HiIcons, ...TbIcons, ...PiIcons, 
-    ...MdIcons, ...DiIcons 
-  };
   const IconComponent = AllIcons[iconName];
 
   if (IconComponent) {

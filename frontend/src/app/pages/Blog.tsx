@@ -42,9 +42,10 @@ export default function Blog() {
       .finally(() => setLoading(false));
   }, []);
 
-  const categories = ["All", ...Array.from(new Set(blogs.map(b => b.category)))];
+  const blogPosts = blogs.filter(b => b.category !== "Case Study");
+  const categories = ["All", ...Array.from(new Set(blogPosts.map(b => b.category)))];
 
-  const filtered = blogs.filter(b => {
+  const filtered = blogPosts.filter(b => {
     const matchSearch =
       b.title.toLowerCase().includes(search.toLowerCase()) ||
       b.excerpt.toLowerCase().includes(search.toLowerCase()) ||
@@ -71,7 +72,7 @@ export default function Blog() {
           transition={{ duration: 0.8 }}
           className="relative max-w-7xl mx-auto text-center space-y-6 z-10"
         >
-          <span className="inline-block text-xs font-semibold tracking-widest uppercase px-4 py-1.5 rounded-full border border-primary-foreground/20 bg-primary-foreground/10 text-primary-foreground/80 backdrop-blur-md">
+          <span className="inline-block text-xs font-semibold tracking-widest uppercase px-4 py-1.5 rounded-full border border-primary-foreground/20 bg-primary-foreground/10 text-primary-foreground/80 ">
             Writing & Thoughts
           </span>
           <h1 className="text-5xl sm:text-6xl font-bold text-primary-foreground">Blog</h1>
@@ -82,7 +83,7 @@ export default function Blog() {
       </section>
 
       {/* ── Search & Filter Bar ── */}
-      <section className="py-6 sm:py-8 px-4 sm:px-6 lg:px-12 sticky top-16 sm:top-20 z-30 bg-background/80 backdrop-blur-md border-b border-border">
+      <section className="py-6 sm:py-8 px-4 sm:px-6 lg:px-12 sticky top-16 sm:top-20 z-30 bg-background border-b border-border">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row gap-4 items-center justify-between">
           <div className="relative w-full sm:max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />

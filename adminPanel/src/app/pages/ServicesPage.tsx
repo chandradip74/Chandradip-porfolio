@@ -135,7 +135,7 @@ export function ServicesPage() {
               )}
               <div className="p-6 flex flex-col gap-4 flex-1">
                 <div className="flex items-start justify-between">
-                  <h3 className="text-foreground font-medium flex-1">{service.title}</h3>
+                  <h3 className="text-foreground font-medium flex-1 truncate" title={service.title}>{service.title}</h3>
                   <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity ml-2">
                     <button onClick={() => openEdit(service)} className="w-8 h-8 rounded-md hover:bg-accent flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors">
                       <Pencil className="w-3.5 h-3.5" />
@@ -145,7 +145,7 @@ export function ServicesPage() {
                     </button>
                   </div>
                 </div>
-                <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3">{service.description}</p>
+                <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3" title={service.description}>{service.description}</p>
                 {service.tags?.length > 0 && (
                   <div className="flex flex-wrap gap-2 mt-auto">
                     {service.tags.map((tag) => (

@@ -10,6 +10,7 @@ const Achievement = lazy(() => import("./pages/Achievement"));
 const Contact = lazy(() => import("./pages/Contact"));
 const Blog = lazy(() => import("./pages/Blog"));
 const BlogPost = lazy(() => import("./pages/BlogPost"));
+const CaseStudies = lazy(() => import("./pages/CaseStudies"));
 
 const LoadingFallback = () => (
   <div className="w-full h-screen flex items-center justify-center bg-background">
@@ -28,6 +29,7 @@ export const router = createBrowserRouter([
       { path: "achievement", element: <Suspense fallback={<LoadingFallback />}><Achievement /></Suspense> },
       { path: "blog", element: <Suspense fallback={<LoadingFallback />}><Blog /></Suspense> },
       { path: "blog/:slug", element: <Suspense fallback={<LoadingFallback />}><BlogPost /></Suspense> },
+      { path: "case-studies", element: <Suspense fallback={<LoadingFallback />}><CaseStudies /></Suspense> },
       { path: "contact", element: <Suspense fallback={<LoadingFallback />}><Contact /></Suspense> },
     ],
   },

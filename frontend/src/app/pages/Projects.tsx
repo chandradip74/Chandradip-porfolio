@@ -71,7 +71,7 @@ export default function Projects() {
           transition={{ duration: 0.8 }}
           className="relative max-w-7xl mx-auto text-center space-y-6 z-10"
         >
-          <span className="inline-block text-xs font-semibold tracking-widest uppercase px-4 py-1.5 rounded-full border border-primary-foreground/20 bg-primary-foreground/10 text-primary-foreground/80 backdrop-blur-md">
+          <span className="inline-block text-xs font-semibold tracking-widest uppercase px-4 py-1.5 rounded-full border border-primary-foreground/20 bg-primary-foreground/10 text-primary-foreground/80 ">
             My Work
           </span>
           <h1 className="text-5xl sm:text-6xl font-bold text-primary-foreground">
@@ -85,7 +85,7 @@ export default function Projects() {
       </section>
 
       {/* Search bar */}
-      <section className="py-6 sm:py-8 px-4 sm:px-6 lg:px-12 sticky top-16 sm:top-20 z-30 bg-background/80 backdrop-blur-md border-b border-border">
+      <section className="py-6 sm:py-8 px-4 sm:px-6 lg:px-12 sticky top-16 sm:top-20 z-30 bg-background border-b border-border">
         <div className="max-w-7xl mx-auto flex justify-center">
           <input
             type="text"
@@ -147,7 +147,7 @@ export default function Projects() {
                             href={project.projectLink}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="w-10 h-10 rounded-xl flex items-center justify-center bg-background/90 text-foreground backdrop-blur-sm border border-border/50 hover:bg-primary hover:text-primary-foreground hover:scale-110 transition-all duration-300"
+                            className="w-10 h-10 rounded-xl flex items-center justify-center bg-background text-foreground  border border-border/50 hover:bg-primary hover:text-primary-foreground hover:scale-110 transition-all duration-300"
                             aria-label="Live Demo"
                           >
                             <ExternalLink size={18} />

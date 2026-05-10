@@ -200,9 +200,9 @@ export function ProjectsPage() {
                   </div>
                   <div className="p-5">
                     <div className="flex items-start justify-between mb-2">
-                      <h3 className="text-foreground font-medium">{project.title}</h3>
+                      <h3 className="text-foreground font-medium truncate" title={project.title}>{project.title}</h3>
                     </div>
-                    <p className="text-sm text-muted-foreground leading-relaxed mb-3 line-clamp-2">{project.description}</p>
+                    <p className="text-sm text-muted-foreground leading-relaxed mb-3 line-clamp-2" title={project.description}>{project.description}</p>
                     <div className="flex flex-wrap gap-1.5 mb-4 items-center">
                       {project.technologies.slice(0, 5).map((t, idx) => (
                         <span key={idx} className="px-2 py-1 bg-accent text-accent-foreground rounded-md text-xs font-medium flex items-center justify-center min-w-8">
@@ -247,8 +247,8 @@ export function ProjectsPage() {
                             {project.image ? <img src={project.image} alt="" className="w-full h-full object-cover" /> : null}
                           </div>
                           <div>
-                            <p className="text-sm font-medium text-foreground">{project.title}</p>
-                            <p className="text-xs text-muted-foreground hidden sm:block line-clamp-1">{project.description}</p>
+                            <p className="text-sm font-medium text-foreground truncate max-w-[200px]" title={project.title}>{project.title}</p>
+                            <p className="text-xs text-muted-foreground hidden sm:block line-clamp-1" title={project.description}>{project.description}</p>
                           </div>
                         </div>
                       </td>

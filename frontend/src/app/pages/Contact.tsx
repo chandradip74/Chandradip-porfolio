@@ -104,7 +104,7 @@ export default function Contact() {
           transition={{ duration: 0.8 }}
           className="relative max-w-7xl mx-auto text-center space-y-6 z-10"
         >
-          <span className="inline-block text-xs font-semibold tracking-widest uppercase px-4 py-1.5 rounded-full border border-primary-foreground/20 bg-primary-foreground/10 text-primary-foreground/80 backdrop-blur-md">
+          <span className="inline-block text-xs font-semibold tracking-widest uppercase px-4 py-1.5 rounded-full border border-primary-foreground/20 bg-primary-foreground/10 text-primary-foreground/80 ">
             Get In Touch
           </span>
           <h1 className="text-5xl sm:text-6xl font-bold text-primary-foreground">
