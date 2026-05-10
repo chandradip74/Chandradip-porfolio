@@ -1,5 +1,9 @@
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
+import mongoSanitize from 'express-mongo-sanitize';
+import hpp from 'hpp';
 import { errorHandler, notFound } from './middleware/errorMiddleware.js';
 
 import profileRoutes from './routes/profileRoutes.js';
@@ -17,17 +21,41 @@ import processRoutes from './routes/processRoutes.js';
 import socialMediaRoutes from './routes/socialMediaRoutes.js';
 import blogRoutes from './routes/blogRoutes.js';
 
-
 const app = express();
+
+// Set security HTTP headers
+app.use(helmet());
+
+// Rate limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100 // limit each IP to 100 requests per windowMs
+});
+app.use('/api/', limiter);
+
+// Data sanitization against NoSQL query injection
+app.use(mongoSanitize());
+
+// Prevent parameter pollution
+app.use(hpp());
 
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow all localhost origins (any port) and requests with no origin (e.g. mobile/curl)
-    if (!origin || /^http:\/\/localhost(:\d+)?$/.test(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
+    // Allow requests with no origin (e.g. mobile apps, curl requests)
+    if (!origin) return callback(null, true);
+    
+    // Check if the origin is localhost
+    if (/^http:\/\/localhost(:\d+)?$/.test(origin)) {
+      return callback(null, true);
     }
+
+    // Check if the origin is in the allowed list from environment variables
+    const allowedOrigins = process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : [];
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    
+    callback(new Error('Not allowed by CORS'));
   },
   credentials: true,
 }));

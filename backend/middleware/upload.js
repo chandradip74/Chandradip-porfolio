@@ -17,7 +17,7 @@ const fileFilter = (req, file, cb) => {
 export const upload = multer({
   storage,
   fileFilter,
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit for production
 });
 
 /**
@@ -30,8 +30,21 @@ export const upload = multer({
  */
 export const uploadToCloudinary = (buffer, folder, resourceType = 'auto', metadata = null) => {
   return new Promise((resolve, reject) => {
+    
+    const uploadOptions = { 
+      folder: `portfolio/${folder}`, 
+      resource_type: resourceType,
+    };
+
+    // Apply optimization if it's an image
+    if (resourceType === 'image' || resourceType === 'auto') {
+      uploadOptions.transformation = [
+        { quality: 'auto', fetch_format: 'auto' } // Image optimization
+      ];
+    }
+
     const stream = cloudinary.uploader.upload_stream(
-      { folder: `portfolio/${folder}`, resource_type: resourceType },
+      uploadOptions,
       async (error, result) => {
         if (result) {
           // If metadata is provided, save as a Resource
