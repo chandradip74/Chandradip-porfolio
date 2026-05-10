@@ -4,6 +4,7 @@ import { useTheme } from 'next-themes';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router';
 import { toast } from 'sonner';
+import { api } from '../lib/api';
 
 export function SettingsPage() {
   const { theme, resolvedTheme, setTheme } = useTheme();
@@ -33,10 +34,13 @@ export function SettingsPage() {
   };
 
   const handleSavePassword = async () => {
+    if (!currentPassword.trim()) { toast.error('Current password is required'); return; }
+    if (!newPassword.trim()) { toast.error('New password is required'); return; }
     if (newPassword !== confirmPassword) { toast.error('Passwords do not match'); return; }
     if (newPassword.length < 6) { toast.error('Password must be at least 6 characters'); return; }
+    if (currentPassword === newPassword) { toast.error('New password must be different from current password'); return; }
     try {
-      await api.put('/auth/profile', { password: newPassword });
+      await api.put('/auth/change-password', { currentPassword, newPassword });
       toast.success('Password updated successfully! Please log in again.');
       setCurrentPassword(''); setNewPassword(''); setConfirmPassword('');
       logout();

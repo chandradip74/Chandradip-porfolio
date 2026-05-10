@@ -159,7 +159,7 @@ export function LoginPage() {
                 />
                 <span className="text-sm text-foreground">Remember me</span>
               </label>
-              <button type="button" className="text-sm text-blue-500 hover:text-blue-600 transition-colors">
+              <button type="button" onClick={() => navigate('/forgot-password')} className="text-sm text-blue-500 hover:text-blue-600 transition-colors">
                 Forgot password?
               </button>
             </div>

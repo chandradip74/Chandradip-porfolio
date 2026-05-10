@@ -59,19 +59,13 @@ export const getUserProfile = asyncHandler(async (req, res) => {
   }
 });
 
-// @desc    Update user profile / password
+// @desc    Update user profile (username)
 // @route   PUT /api/auth/profile
 export const updateUserProfile = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id);
 
   if (user) {
     user.username = req.body.username || user.username;
-
-    if (req.body.password) {
-      user.oldPassword = user.password; // store old hashed password
-      user.password = req.body.password; // will be hashed by pre-save hook
-    }
-
     const updatedUser = await user.save();
 
     res.json({
@@ -83,4 +77,38 @@ export const updateUserProfile = asyncHandler(async (req, res) => {
     res.status(404);
     throw new Error('User not found');
   }
+});
+
+// @desc    Change password (requires current password verification)
+// @route   PUT /api/auth/change-password
+export const changePassword = asyncHandler(async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+
+  if (!currentPassword || !newPassword) {
+    res.status(400);
+    throw new Error('Current password and new password are required');
+  }
+
+  if (newPassword.length < 6) {
+    res.status(400);
+    throw new Error('New password must be at least 6 characters');
+  }
+
+  const user = await User.findById(req.user._id);
+
+  if (!user) {
+    res.status(404);
+    throw new Error('User not found');
+  }
+
+  const isMatch = await user.matchPassword(currentPassword);
+  if (!isMatch) {
+    res.status(401);
+    throw new Error('Current password is incorrect');
+  }
+
+  user.password = newPassword; // will be hashed by pre-save hook
+  await user.save();
+
+  res.json({ message: 'Password updated successfully' });
 });
