@@ -94,23 +94,23 @@ export default function Contact() {
   return (
     <div className="bg-background text-foreground transition-colors duration-300 min-h-screen">
       {/* Hero */}
-      <section className="relative pt-36 pb-24 px-6 lg:px-12 bg-primary overflow-hidden">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none" />
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-background/5 blur-[120px] rounded-full pointer-events-none" />
+      <section className="relative pt-20 sm:pt-24 pb-14 sm:pb-20 px-4 sm:px-6 lg:px-8 bg-card border-b border-border overflow-hidden">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff06_1px,transparent_1px),linear-gradient(to_bottom,#ffffff06_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[500px] bg-white/3 blur-[100px] rounded-full pointer-events-none" />
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="relative max-w-7xl mx-auto text-center space-y-6 z-10"
+          transition={{ duration: 0.7 }}
+          className="relative max-w-7xl mx-auto text-center space-y-4 z-10"
         >
-          <span className="inline-block text-xs font-semibold tracking-widest uppercase px-4 py-1.5 rounded-full border border-primary-foreground/20 bg-primary-foreground/10 text-primary-foreground/80 ">
+          <span className="inline-block text-xs font-semibold tracking-widest uppercase px-4 py-1.5 rounded-full border border-border bg-muted text-muted-foreground">
             Get In Touch
           </span>
-          <h1 className="text-5xl sm:text-6xl font-bold text-primary-foreground">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground">
             Contact Me
           </h1>
-          <p className="text-lg max-w-xl mx-auto text-primary-foreground/70 leading-relaxed">
+          <p className="text-base sm:text-lg max-w-xl mx-auto text-muted-foreground leading-relaxed">
             Have a project in mind or want to collaborate? I'd love to hear from you.
             Let's create something extraordinary together.
           </p>

@@ -49,12 +49,12 @@ export function TopProgressBar() {
     <>
       {/* Top glowing progress bar */}
       <div
-        className="fixed top-0 left-0 right-0 z-[9999] h-[3px] pointer-events-none"
+        className="fixed top-0 left-0 right-0 z-[9999] h-[2px] pointer-events-none"
         role="progressbar"
         aria-label="Global loading"
       >
         <div
-          className="h-full bg-primary shadow-[0_0_15px_3px] shadow-primary/70 rounded-r-full transition-all ease-out"
+          className="h-full bg-red-600 shadow-[0_0_10px_2px] shadow-red-600/50 rounded-r-full transition-all ease-out"
           style={{ width: `${width}%`, transitionDuration: width === 100 ? "200ms" : "800ms" }}
         />
       </div>

@@ -1,9 +1,7 @@
-/** Reusable skeleton shimmer block */
 export function SkeletonBlock({ className = "" }: { className?: string }) {
   return (
     <div
-      className={`animate-pulse bg-gradient-to-r from-muted via-muted/60 to-muted bg-[length:200%_100%] rounded-xl ${className}`}
-      style={{ animation: "shimmer 1.6s infinite linear" }}
+      className={`animate-pulse bg-muted/50 rounded-lg ${className}`}
     />
   );
 }

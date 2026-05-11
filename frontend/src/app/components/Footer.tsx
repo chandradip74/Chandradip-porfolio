@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { NavLink } from "react-router";
-
 import { api } from "../lib/api";
 import { IconRenderer } from "./ui/IconRenderer";
 
@@ -19,47 +18,51 @@ export default function Footer() {
   }, []);
 
   const displayName = profile?.name || "Chandradipsinh";
-  const displayRole = profile?.role?.join(', ') || "Full-stack developer crafting elegant digital experiences.";
-  const displayEmail = profile?.email || "hello@example.com";
   const currentYear = new Date().getFullYear();
 
-  return (
-    <footer className="w-full py-16 px-6 lg:px-12 bg-background border-t border-border">
-      <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
-          {/* Brand — same style as Navbar logo */}
-          <div className="space-y-4">
-            <NavLink to="/" className="inline-flex items-center group overflow-hidden px-1">
-              <span className="text-xl font-black tracking-tighter text-foreground flex items-center">
-                <span className="text-primary font-mono opacity-80 group-hover:opacity-100 group-hover:-translate-y-0.5 transition-all duration-300 mr-1">&lt;/&gt;</span>
-                <span className="bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/60 group-hover:translate-x-1 transition-transform duration-300">
-                  {displayName}
-                </span>
-              </span>
-            </NavLink>
-            <p className="text-sm leading-relaxed text-muted-foreground">
-              {displayRole}
-            </p>
-          </div>
+  const mainLinks = [
+    { label: "Home", to: "/" },
+    { label: "Contact", to: "/contact" },
+    { label: "Achievement", to: "/achievement" },
+    { label: "Case Studies", to: "/case-studies" },
+  ];
 
-          {/* Quick Links */}
-          <div className="space-y-4">
-            <h4 className="text-sm font-semibold tracking-widest uppercase text-muted-foreground/70">
-              Navigation
-            </h4>
+  const learnLinks = [
+    { label: "Services", to: "/services" },
+    { label: "Projects", to: "/projects" },
+    { label: "Blog", to: "/blog" },
+  ];
+
+  const legalLinks = [
+    { label: "Privacy Policy", to: "/" },
+    { label: "Terms of Use", to: "/" },
+  ];
+
+  return (
+    <footer className="w-full bg-background border-t border-border">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Brand Logo in Footer */}
+        <div className="mb-10">
+          <NavLink to="/" className="inline-flex items-center gap-2">
+            <span className="font-bold text-foreground text-2xl sm:text-3xl tracking-tighter flex items-center">
+              <span className="font-mono text-foreground/70 mr-1.5">&lt;/&gt;</span>
+              <span>{displayName}</span>
+            </span>
+          </NavLink>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 mb-10">
+
+          {/* Main */}
+          <div className="space-y-3">
+            <h4 className="text-sm font-semibold text-foreground">Main</h4>
             <ul className="space-y-2">
-              {[
-                { label: "Home", to: "/" },
-                { label: "Services", to: "/services" },
-                { label: "Projects", to: "/projects" },
-                { label: "Achievement", to: "/achievement" },
-                { label: "Contact Me", to: "/contact" },
-              ].map((item) => (
-                <li key={item.to}>
+              {mainLinks.map((item) => (
+                <li key={item.to + item.label}>
                   <NavLink
                     to={item.to}
                     end={item.to === "/"}
-                    className="text-sm transition-colors duration-200 text-muted-foreground hover:text-foreground"
+                    className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-200"
                   >
                     {item.label}
                   </NavLink>
@@ -68,43 +71,79 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Connect — Social Media Icons */}
-          <div className="space-y-4">
-            <h4 className="text-sm font-semibold tracking-widest uppercase text-muted-foreground/70">
-              Connect
-            </h4>
+          {/* Learn */}
+          <div className="space-y-3">
+            <h4 className="text-sm font-semibold text-foreground">Learn</h4>
+            <ul className="space-y-2">
+              {learnLinks.map((item) => (
+                <li key={item.to + item.label}>
+                  <NavLink
+                    to={item.to}
+                    className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-200"
+                  >
+                    {item.label}
+                  </NavLink>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Legal */}
+          <div className="space-y-3">
+            <h4 className="text-sm font-semibold text-foreground">Legal</h4>
+            <ul className="space-y-2">
+              {legalLinks.map((item) => (
+                <li key={item.label}>
+                  <NavLink
+                    to={item.to}
+                    className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-200"
+                  >
+                    {item.label}
+                  </NavLink>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Social */}
+          <div className="space-y-3">
+            <h4 className="text-sm font-semibold text-foreground">Social</h4>
             {socialMedia.length > 0 ? (
-              <div className="flex flex-wrap items-center gap-3">
+              <ul className="space-y-2">
                 {socialMedia.map((item) => {
                   const iconSrc = item.icon || item.image || '';
                   const isHex = item.colorClass?.startsWith('#') || item.colorClass?.startsWith('rgb');
                   return (
-                    <a
-                      key={item._id}
-                      href={item.link}
-                      aria-label={item.platform}
-                      target="_blank"
-                      rel="noreferrer"
-                      className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-200 hover:scale-110 border border-border bg-muted/30 hover:bg-muted overflow-hidden ${!isHex ? (item.colorClass || '') : ''}`}
-                      style={isHex ? { color: item.colorClass } : undefined}
-                      title={item.platform}
-                    >
-                      <IconRenderer icon={iconSrc} size={20} />
-                    </a>
+                    <li key={item._id}>
+                      <a
+                        href={item.link}
+                        target="_blank"
+                        rel="noreferrer"
+                        className={`inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors duration-200 ${!isHex ? (item.colorClass || '') : ''}`}
+                        style={isHex ? { color: item.colorClass } : undefined}
+                      >
+                        <span className="flex-shrink-0">
+                          <IconRenderer icon={iconSrc} size={16} />
+                        </span>
+                        <span>{item.platform}</span>
+                      </a>
+                    </li>
                   );
                 })}
-              </div>
-            ) : null}
-            <p className="text-sm text-muted-foreground break-all">{displayEmail}</p>
+              </ul>
+            ) : (
+              <p className="text-sm text-muted-foreground">{profile?.email || ''}</p>
+            )}
           </div>
         </div>
 
-        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-border">
-          <p className="text-xs text-muted-foreground/70">
-            © {currentYear} {displayName}. All rights reserved.
-          </p>
-          <p className="text-xs text-muted-foreground/70">
-            Designed & Built with passion
+        {/* Bottom bar */}
+        <div className="pt-8 border-t border-border text-center">
+          <p className="text-sm text-muted-foreground">
+            Made with <span className="text-red-500">♥</span> and{" "}
+            <span className="text-yellow-500">☕</span> by{" "}
+            <span className="text-foreground font-medium">{displayName}</span>{" "}
+            &copy; {currentYear}
           </p>
         </div>
       </div>

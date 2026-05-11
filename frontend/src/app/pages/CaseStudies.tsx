@@ -49,27 +49,26 @@ export default function CaseStudies() {
   return (
     <div className="bg-background text-foreground transition-colors duration-300 min-h-screen">
       {/* ── Hero ── */}
-      <section className="relative pt-28 sm:pt-36 pb-16 sm:pb-24 px-4 sm:px-6 lg:px-12 bg-primary overflow-hidden">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none" />
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-background/5 blur-[120px] rounded-full pointer-events-none" />
+      <section className="relative pt-20 sm:pt-24 pb-14 sm:pb-20 px-4 sm:px-6 lg:px-8 bg-card border-b border-border overflow-hidden">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff06_1px,transparent_1px),linear-gradient(to_bottom,#ffffff06_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none" />
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="relative max-w-7xl mx-auto text-center space-y-6 z-10"
+          transition={{ duration: 0.7 }}
+          className="relative max-w-7xl mx-auto text-center space-y-4 z-10"
         >
-          <span className="inline-flex items-center gap-2 text-xs font-semibold tracking-widest uppercase px-4 py-1.5 rounded-full border border-primary-foreground/20 bg-primary-foreground/10 text-primary-foreground/90  shadow-sm">
-            <Lightbulb size={14} className="text-primary-foreground" /> Problem Solving & Architecture
+          <span className="inline-flex items-center gap-2 text-xs font-semibold tracking-widest uppercase px-4 py-1.5 rounded-full border border-border bg-muted text-muted-foreground">
+            <Lightbulb size={13} /> Problem Solving & Architecture
           </span>
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-primary-foreground tracking-tight">Case Studies</h1>
-          <p className="text-lg sm:text-xl max-w-2xl mx-auto text-primary-foreground/80 leading-relaxed font-medium">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground">Case Studies</h1>
+          <p className="text-base sm:text-lg max-w-2xl mx-auto text-muted-foreground leading-relaxed">
             Deep dives into complex engineering challenges, architectural trade-offs, and my academic research.
           </p>
         </motion.div>
       </section>
 
       {/* ── Search Bar ── */}
-      <section className="py-6 sm:py-8 px-4 sm:px-6 lg:px-12 sticky top-16 sm:top-20 z-30 bg-background border-b border-border">
+      <section className="py-4 px-4 sm:px-6 lg:px-8 sticky top-14 z-30 bg-background border-b border-border">
         <div className="max-w-3xl mx-auto flex flex-col sm:flex-row gap-4 items-center justify-center">
           <div className="relative w-full">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />

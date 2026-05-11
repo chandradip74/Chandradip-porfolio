@@ -39,15 +39,15 @@ function CodeBlock({ lang, codeLines }: { lang: string, codeLines: string[] }) {
   };
 
   return (
-    <div className="relative my-8 rounded-xl overflow-hidden border border-border group bg-[#161b22] dark:bg-[#161b22]">
+    <div className="relative my-8 rounded-xl overflow-hidden border border-border group bg-card">
       <button 
         onClick={handleCopy}
-        className="absolute top-3 right-3 p-2 rounded-md bg-[#21262d] text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity hover:text-foreground hover:bg-[#30363d] border border-border/50"
+        className="absolute top-3 right-3 p-2 rounded-md bg-muted text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity hover:text-foreground hover:bg-accent border border-border"
         title="Copy code"
       >
         {copied ? <Check size={16} className="text-green-400" /> : <Clipboard size={16} />}
       </button>
-      <pre className="overflow-x-auto p-5 text-[#e6edf3] text-sm leading-relaxed font-mono">
+      <pre className="overflow-x-auto p-5 text-foreground/90 text-sm leading-relaxed font-mono">
         <code>{codeString}</code>
       </pre>
     </div>
@@ -254,10 +254,10 @@ export default function BlogPost() {
           className="flex items-center gap-2 text-sm text-muted-foreground"
         >
           <NavLink to="/blog" className="hover:text-foreground transition-colors flex items-center gap-1">
-            <ArrowLeft size={14} /> Blog
+            <ArrowLeft size={14} /> Back to Blog
           </NavLink>
           <ChevronRight size={14} className="text-border" />
-          <span className="truncate text-foreground/60">{blog.title}</span>
+          <span className="truncate text-muted-foreground">{blog.title}</span>
         </motion.div>
 
         {/* ── Header ── */}
