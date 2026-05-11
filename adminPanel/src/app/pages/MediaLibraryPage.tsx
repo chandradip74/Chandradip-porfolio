@@ -1,10 +1,10 @@
 import { useState, useRef, useEffect } from 'react';
-import { Search, Grid3X3, List, Upload, Trash2, Eye, Copy, FileText, ImageIcon, Video, X, Filter, Loader2, ExternalLink } from 'lucide-react';
+import { Search, Grid3X3, List, Upload, Trash2, ExternalLink, Copy, FileText, ImageIcon, Video, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { api } from '../lib/api';
 
 interface MediaFile {
-  _id: string;
+  publicId: string;
   name: string;
   url: string;
   resourceType: string;
@@ -38,7 +38,7 @@ const formatSize = (bytes: number) => {
 };
 
 const getFileType = (file: MediaFile) => {
-  if (file.format === 'application/pdf' || file.format === 'pdf') return 'pdf';
+  if (file.format === 'pdf' || file.format === 'application/pdf') return 'pdf';
   if (file.resourceType === 'image') return 'image';
   if (file.resourceType === 'video') return 'video';
   return 'raw';
@@ -52,15 +52,21 @@ export function MediaLibraryPage() {
   const [view, setView] = useState<'grid' | 'table'>('grid');
   const [isDragging, setIsDragging] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<MediaFile | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    fetchFiles();
+  }, []);
+
+  const fetchFiles = () => {
+    setLoading(true);
     api.get('/resources')
       .then(setFiles)
-      .catch(() => toast.error('Failed to fetch media library'))
+      .catch(() => toast.error('Failed to fetch media library from Cloudinary'))
       .finally(() => setLoading(false));
-  }, []);
+  };
 
   const filtered = files.filter((f) => {
     const matchSearch = f.name.toLowerCase().includes(search.toLowerCase());
@@ -80,13 +86,12 @@ export function MediaLibraryPage() {
     if (!fileList || fileList.length === 0) return;
     const file = fileList[0];
     setUploading(true);
-    
     try {
       const formData = new FormData();
       formData.append('file', file);
       const newFile = await api.postForm('/resources', formData);
       setFiles((prev) => [newFile, ...prev]);
-      toast.success(`"${file.name}" uploaded successfully!`);
+      toast.success(`"${file.name}" uploaded to Cloudinary!`);
     } catch (e: any) {
       toast.error(e.message || 'Upload failed');
     } finally {
@@ -100,15 +105,19 @@ export function MediaLibraryPage() {
     handleUpload(e.dataTransfer.files);
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
     try {
-      await api.del(`/resources/${id}`);
-      setFiles(files.filter((f) => f._id !== id));
-      toast.success('File deleted');
+      // publicId may contain slashes — pass it directly as the URL path
+      await api.del(`/resources/${deleteTarget.publicId}`);
+      setFiles(files.filter((f) => f.publicId !== deleteTarget.publicId));
+      toast.success(`"${deleteTarget.name}" deleted from Cloudinary`);
     } catch (e: any) {
-      toast.error(e.message || 'Failed to delete');
+      toast.error(e.message || 'Failed to delete from Cloudinary');
     } finally {
-      setDeleteId(null);
+      setDeleting(false);
+      setDeleteTarget(null);
     }
   };
 
@@ -130,14 +139,24 @@ export function MediaLibraryPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-foreground">Media Library</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">{files.length} files stored</p>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            {loading ? 'Loading from Cloudinary...' : `${files.length} files in Cloudinary storage`}
+          </p>
         </div>
-        <button
-          onClick={() => fileInputRef.current?.click()}
-          className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
-        >
-          <Upload className="w-4 h-4" /> Upload File
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={fetchFiles}
+            className="flex items-center gap-2 px-3 py-2 bg-card border border-border text-foreground rounded-lg text-sm font-medium hover:bg-accent transition-colors"
+          >
+            Refresh
+          </button>
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
+          >
+            <Upload className="w-4 h-4" /> Upload File
+          </button>
+        </div>
         <input ref={fileInputRef} type="file" multiple className="hidden" onChange={(e) => handleUpload(e.target.files)} />
       </div>
 
@@ -153,7 +172,7 @@ export function MediaLibraryPage() {
       >
         <Upload className={`w-8 h-8 mx-auto mb-3 transition-colors ${isDragging ? 'text-primary' : 'text-muted-foreground'}`} />
         <p className="text-sm font-medium text-foreground mb-1">
-          {isDragging ? 'Drop to upload' : 'Drag & drop files here'}
+          {isDragging ? 'Drop to upload to Cloudinary' : 'Drag & drop files here'}
         </p>
         <p className="text-xs text-muted-foreground">or click to browse • Images, PDFs, Videos supported</p>
       </div>
@@ -162,13 +181,14 @@ export function MediaLibraryPage() {
       {uploading && (
         <div className="bg-card border border-border rounded-xl p-4 flex items-center gap-3">
           <Loader2 className="w-5 h-5 animate-spin text-primary" />
-          <p className="text-sm font-medium text-foreground">Uploading file...</p>
+          <p className="text-sm font-medium text-foreground">Uploading to Cloudinary...</p>
         </div>
       )}
 
       {loading && (
-        <div className="flex items-center justify-center h-40">
+        <div className="flex flex-col items-center justify-center h-40 gap-2">
           <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+          <p className="text-sm text-muted-foreground">Fetching from Cloudinary...</p>
         </div>
       )}
 
@@ -215,8 +235,8 @@ export function MediaLibraryPage() {
             const Icon = typeIcons[fType] || FileText;
             const displayDate = new Date(file.createdAt).toISOString().split('T')[0];
             return (
-              <div key={file._id} className="bg-card border border-border rounded-xl overflow-hidden hover:shadow-sm transition-all group">
-                <div className={`h-28 bg-muted flex items-center justify-center relative overflow-hidden`}>
+              <div key={file.publicId} className="bg-card border border-border rounded-xl overflow-hidden hover:shadow-sm transition-all group">
+                <div className="h-28 bg-muted flex items-center justify-center relative overflow-hidden">
                   {fType === 'image' && file.url ? (
                     <img src={file.url} alt={file.name} className="w-full h-full object-cover" />
                   ) : (
@@ -225,19 +245,25 @@ export function MediaLibraryPage() {
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5">
                     <button onClick={() => window.open(file.url, '_blank')} className="bg-white/90 text-gray-900 rounded-md p-1.5 hover:bg-white transition-colors"><ExternalLink className="w-3.5 h-3.5" /></button>
                     <button onClick={() => copyUrl(file.url)} className="bg-white/90 text-gray-900 rounded-md p-1.5 hover:bg-white transition-colors"><Copy className="w-3.5 h-3.5" /></button>
-                    <button onClick={() => setDeleteId(file._id)} className="bg-white/90 text-red-600 rounded-md p-1.5 hover:bg-white transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
+                    <button onClick={() => setDeleteTarget(file)} className="bg-white/90 text-red-600 rounded-md p-1.5 hover:bg-white transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
                   </div>
                 </div>
                 <div className="p-3">
-                  <p className="text-xs font-medium text-foreground truncate" title={file.name}>{file.name}</p>
+                  <p className="text-xs font-medium text-foreground truncate" title={file.publicId}>{file.name}</p>
                   <div className="flex items-center justify-between mt-1">
                     <span className={`px-1.5 py-0.5 rounded text-xs font-medium uppercase ${typeBadgeColors[fType] || typeBadgeColors.raw}`}>{fType}</span>
                     <span className="text-xs text-muted-foreground">{formatSize(file.size)}</span>
                   </div>
+                  <p className="text-xs text-muted-foreground mt-1">{displayDate}</p>
                 </div>
               </div>
             );
           })}
+          {filtered.length === 0 && !loading && (
+            <div className="col-span-full py-12 text-center text-muted-foreground">
+              <p className="text-sm">No files found in Cloudinary</p>
+            </div>
+          )}
         </div>
       )}
 
@@ -260,17 +286,20 @@ export function MediaLibraryPage() {
                 const Icon = typeIcons[fType] || FileText;
                 const displayDate = new Date(file.createdAt).toISOString().split('T')[0];
                 return (
-                  <tr key={file._id} className="border-b border-border last:border-0 hover:bg-accent/30 transition-colors">
+                  <tr key={file.publicId} className="border-b border-border last:border-0 hover:bg-accent/30 transition-colors">
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
-                        <div className={`w-9 h-9 rounded-lg bg-muted flex items-center justify-center flex-shrink-0 overflow-hidden`}>
+                        <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center flex-shrink-0 overflow-hidden">
                           {fType === 'image' && file.url ? (
                             <img src={file.url} alt="" className="w-full h-full object-cover" />
                           ) : (
                             <Icon className="w-4 h-4 text-muted-foreground" />
                           )}
                         </div>
-                        <span className="text-sm text-foreground truncate max-w-[180px]" title={file.name}>{file.name}</span>
+                        <div className="min-w-0">
+                          <span className="text-sm text-foreground truncate max-w-[180px] block" title={file.publicId}>{file.name}</span>
+                          <span className="text-xs text-muted-foreground truncate max-w-[180px] block">{file.publicId}</span>
+                        </div>
                       </div>
                     </td>
                     <td className="px-4 py-3 hidden sm:table-cell">
@@ -282,32 +311,50 @@ export function MediaLibraryPage() {
                       <div className="flex items-center justify-end gap-1">
                         <button onClick={() => window.open(file.url, '_blank')} className="w-7 h-7 rounded-md hover:bg-accent flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"><ExternalLink className="w-3.5 h-3.5" /></button>
                         <button onClick={() => copyUrl(file.url)} className="w-7 h-7 rounded-md hover:bg-accent flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"><Copy className="w-3.5 h-3.5" /></button>
-                        <button onClick={() => setDeleteId(file._id)} className="w-7 h-7 rounded-md hover:bg-red-500/10 flex items-center justify-center text-muted-foreground hover:text-red-500 transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
+                        <button onClick={() => setDeleteTarget(file)} className="w-7 h-7 rounded-md hover:bg-red-500/10 flex items-center justify-center text-muted-foreground hover:text-red-500 transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
                       </div>
                     </td>
                   </tr>
                 );
               })}
+              {filtered.length === 0 && (
+                <tr><td colSpan={5} className="py-12 text-center text-sm text-muted-foreground">No files found</td></tr>
+              )}
             </tbody>
           </table>
-          {filtered.length === 0 && (
-            <div className="py-12 text-center text-muted-foreground">
-              <p className="text-sm">No files found</p>
-            </div>
-          )}
         </div>
       )}
 
-      {/* Delete confirm */}
-      {deleteId !== null && (
+      {/* Delete confirm modal */}
+      {deleteTarget !== null && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/50" onClick={() => setDeleteId(null)} />
+          <div className="absolute inset-0 bg-black/50" onClick={() => !deleting && setDeleteTarget(null)} />
           <div className="relative bg-card border border-border rounded-2xl shadow-xl w-full max-w-sm p-6 text-center space-y-4">
-            <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center mx-auto"><Trash2 className="w-6 h-6 text-red-500" /></div>
-            <div><h3 className="text-foreground font-medium">Delete File?</h3><p className="text-sm text-muted-foreground mt-1">This action cannot be undone.</p></div>
+            <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center mx-auto">
+              <Trash2 className="w-6 h-6 text-red-500" />
+            </div>
+            <div>
+              <h3 className="text-foreground font-medium">Delete from Cloudinary?</h3>
+              <p className="text-xs text-muted-foreground mt-1 break-all">
+                <span className="font-mono bg-muted px-1 rounded">{deleteTarget.publicId}</span>
+              </p>
+              <p className="text-sm text-red-500 mt-2 font-medium">This permanently removes the file from Cloudinary storage.</p>
+            </div>
             <div className="flex gap-3">
-              <button onClick={() => setDeleteId(null)} className="flex-1 py-2 border border-border rounded-lg text-sm text-foreground hover:bg-accent transition-colors">Cancel</button>
-              <button onClick={() => handleDelete(deleteId)} className="flex-1 py-2 bg-destructive text-destructive-foreground rounded-lg text-sm font-medium hover:opacity-90 transition-opacity">Delete</button>
+              <button
+                onClick={() => setDeleteTarget(null)}
+                disabled={deleting}
+                className="flex-1 py-2 border border-border rounded-lg text-sm text-foreground hover:bg-accent transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={deleting}
+                className="flex-1 py-2 bg-destructive text-destructive-foreground rounded-lg text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {deleting ? <><Loader2 className="w-4 h-4 animate-spin" /> Deleting...</> : 'Delete Forever'}
+              </button>
             </div>
           </div>
         </div>

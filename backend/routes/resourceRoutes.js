@@ -9,7 +9,7 @@ router.route('/')
   .get(protect, getResources)
   .post(protect, upload.single('file'), createResource);
 
-router.route('/:id')
-  .delete(protect, deleteResource);
+// Wildcard route to capture public_ids containing slashes (e.g., portfolio/profile/abc)
+router.delete(/^\/(.+)$/, protect, deleteResource);
 
 export default router;

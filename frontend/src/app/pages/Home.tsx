@@ -58,7 +58,37 @@ export default function Home() {
   const displayRoles = profile?.role?.length ? profile.role : ['Full Stack Developer', 'Web Developer', 'Database Designer'];
   const displayDescription = profile?.description || "I craft elegant, high-performance web and mobile applications. Specializing in modern frameworks to turn complex ideas into seamless digital experiences.";
   const displayAbout = profile?.aboutMe || "I'm a passionate Full-Stack Developer with years of experience building modern web and mobile applications. I specialize in creating clean, scalable, and high-performance digital products that solve real-world problems.";
+
   const cvUrl = profile?.cvFile || "#";
+
+  const handleDownload = async (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (cvUrl === "#") {
+      e.preventDefault();
+      return;
+    }
+    
+    // We try to fetch and download as a blob to force the download dialogue
+    // If it fails (e.g. CORS), we let the default link behavior happen (new tab)
+    try {
+      e.preventDefault();
+      const response = await fetch(cvUrl);
+      if (!response.ok) throw new Error("Network response was not ok");
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.style.display = "none";
+      a.href = blobUrl;
+      const cleanName = (profile?.name || "Portfolio").replace(/\s+/g, "_");
+      a.download = `${cleanName}_CV.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(blobUrl);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error("Failed to download via blob, opening in new tab", error);
+      window.open(cvUrl, '_blank');
+    }
+  };
 
   return (
     <div className="bg-background text-foreground transition-colors duration-300">
@@ -395,9 +425,9 @@ export default function Home() {
           ) : (
             <a
               href={cvUrl}
+              onClick={handleDownload}
               target={cvUrl !== "#" ? "_blank" : undefined}
               rel="noreferrer"
-              download={cvUrl !== "#"}
               className={`group inline-flex items-center gap-3 px-6 py-3.5 rounded-lg font-semibold bg-foreground text-background hover:bg-foreground/90 transition-all shadow-lg text-sm ${cvUrl === "#" ? "opacity-60 cursor-not-allowed" : ""}`}
             >
               <Download size={18} className="group-hover:-translate-y-0.5 transition-transform" />
