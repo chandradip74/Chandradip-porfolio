@@ -6,8 +6,36 @@ import { useNavigate } from 'react-router';
 import { toast } from 'sonner';
 import { api } from '../lib/api';
 
+const Section = ({ title, description, children }: { title: string; description: string; children: React.ReactNode }) => (
+  <div className="bg-card border border-border rounded-xl overflow-hidden">
+    <div className="px-6 py-4 border-b border-border">
+      <h3 className="text-foreground font-medium">{title}</h3>
+      <p className="text-sm text-muted-foreground mt-0.5">{description}</p>
+    </div>
+    <div className="p-6">{children}</div>
+  </div>
+);
+
+const Toggle = ({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) => (
+  <button
+    onClick={() => onChange(!checked)}
+    className={`relative w-10 h-5.5 rounded-full transition-colors flex-shrink-0 ${checked ? 'bg-primary' : 'bg-muted'}`}
+    style={{ height: '22px' }}
+  >
+    <div className={`absolute top-0.5 left-0.5 w-4.5 h-4.5 bg-white rounded-full shadow transition-transform ${checked ? 'translate-x-4' : 'translate-x-0'}`} style={{ width: '18px', height: '18px' }} />
+  </button>
+);
+
+const StatusBadge = ({ ok }: { ok: boolean }) => (
+  <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${ok ? 'bg-green-500/10 text-green-600 dark:text-green-400' : 'bg-red-500/10 text-red-600 dark:text-red-400'}`}>
+    {ok ? <CheckCircle className="w-3.5 h-3.5" /> : <XCircle className="w-3.5 h-3.5" />}
+    {ok ? 'Connected' : 'Disconnected'}
+  </div>
+);
+
 export function SettingsPage() {
   const { theme, resolvedTheme, setTheme } = useTheme();
+
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -51,33 +79,6 @@ export function SettingsPage() {
   };
 
   const handleLogout = () => { logout(); toast.success('Logged out'); navigate('/login'); };
-
-  const Section = ({ title, description, children }: { title: string; description: string; children: React.ReactNode }) => (
-    <div className="bg-card border border-border rounded-xl overflow-hidden">
-      <div className="px-6 py-4 border-b border-border">
-        <h3 className="text-foreground font-medium">{title}</h3>
-        <p className="text-sm text-muted-foreground mt-0.5">{description}</p>
-      </div>
-      <div className="p-6">{children}</div>
-    </div>
-  );
-
-  const Toggle = ({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) => (
-    <button
-      onClick={() => onChange(!checked)}
-      className={`relative w-10 h-5.5 rounded-full transition-colors flex-shrink-0 ${checked ? 'bg-primary' : 'bg-muted'}`}
-      style={{ height: '22px' }}
-    >
-      <div className={`absolute top-0.5 left-0.5 w-4.5 h-4.5 bg-white rounded-full shadow transition-transform ${checked ? 'translate-x-4' : 'translate-x-0'}`} style={{ width: '18px', height: '18px' }} />
-    </button>
-  );
-
-  const StatusBadge = ({ ok }: { ok: boolean }) => (
-    <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${ok ? 'bg-green-500/10 text-green-600 dark:text-green-400' : 'bg-red-500/10 text-red-600 dark:text-red-400'}`}>
-      {ok ? <CheckCircle className="w-3.5 h-3.5" /> : <XCircle className="w-3.5 h-3.5" />}
-      {ok ? 'Connected' : 'Disconnected'}
-    </div>
-  );
 
   return (
     <div className="max-w-3xl space-y-6">

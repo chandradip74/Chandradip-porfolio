@@ -123,8 +123,19 @@ export function Navbar() {
           onClick={() => { setUserMenuOpen(!userMenuOpen); setNotifOpen(false); }}
           className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-accent transition-colors"
         >
-          <div className="w-7 h-7 rounded-full bg-primary flex items-center justify-center">
-            <span className="text-xs text-primary-foreground font-medium">{user?.initials}</span>
+          <div className="w-7 h-7 rounded-full bg-primary flex items-center justify-center overflow-hidden">
+            <img 
+              src="/favicon.png" 
+              alt="Profile" 
+              className="w-full h-full object-cover" 
+              onError={(e) => { 
+                e.currentTarget.style.display = 'none'; 
+                e.currentTarget.nextElementSibling?.classList.remove('hidden'); 
+              }} 
+            />
+            <span className="hidden text-xs text-primary-foreground font-medium">
+              {user?.username ? user.username.charAt(0).toUpperCase() : 'A'}
+            </span>
           </div>
           <span className="text-sm text-foreground hidden sm:block">{user?.name}</span>
           <ChevronDown className="w-3 h-3 text-muted-foreground hidden sm:block" />
