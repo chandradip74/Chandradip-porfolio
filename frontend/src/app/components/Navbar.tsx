@@ -26,7 +26,7 @@ export default function Navbar() {
       .catch(err => console.error('Failed to fetch profile in navbar:', err));
   }, []);
 
-  const displayName = profile?.name || "Chandradipsinh";
+  const displayName = profile?.name || "Chandradip";
 
   useEffect(() => {
     setMenuOpen(false);
@@ -52,10 +52,9 @@ export default function Navbar() {
                 to={item.to}
                 end={item.to === "/"}
                 className={({ isActive }) =>
-                  `px-3 py-1.5 text-sm font-medium rounded-md transition-colors duration-200 ${
-                    isActive
-                      ? "text-foreground bg-muted"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                  `px-3 py-1.5 text-sm font-medium rounded-md transition-colors duration-200 ${isActive
+                    ? "text-foreground bg-muted"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                   }`
                 }
               >
@@ -92,9 +91,8 @@ export default function Navbar() {
 
       {/* Mobile Menu */}
       <div
-        className={`md:hidden border-b border-border bg-background overflow-hidden transition-all duration-300 ${
-          menuOpen ? "max-h-[500px]" : "max-h-0 border-none"
-        }`}
+        className={`md:hidden border-b border-border bg-background overflow-hidden transition-all duration-300 ${menuOpen ? "max-h-[500px]" : "max-h-0 border-none"
+          }`}
       >
         <ul className="flex flex-col px-4 py-3 gap-1">
           {navItems.map((item) => (
@@ -103,10 +101,9 @@ export default function Navbar() {
                 to={item.to}
                 end={item.to === "/"}
                 className={({ isActive }) =>
-                  `block py-2.5 px-3 rounded-md text-sm font-medium transition-all duration-200 ${
-                    isActive
-                      ? "bg-muted text-foreground"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                  `block py-2.5 px-3 rounded-md text-sm font-medium transition-all duration-200 ${isActive
+                    ? "bg-muted text-foreground"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                   }`
                 }
               >

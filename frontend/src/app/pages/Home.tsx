@@ -54,7 +54,7 @@ export default function Home() {
       .finally(() => setInterestsLoading(false));
   }, []);
 
-  const displayName = profile?.name || "Chandradipsinh";
+  const displayName = profile?.name || "Chandradip";
   const displayRoles = profile?.role?.length ? profile.role : ['Full Stack Developer', 'Web Developer', 'Database Designer'];
   const displayDescription = profile?.description || "I craft elegant, high-performance web and mobile applications. Specializing in modern frameworks to turn complex ideas into seamless digital experiences.";
   const displayAbout = profile?.aboutMe || "I'm a passionate Full-Stack Developer with years of experience building modern web and mobile applications. I specialize in creating clean, scalable, and high-performance digital products that solve real-world problems.";
@@ -66,7 +66,7 @@ export default function Home() {
       e.preventDefault();
       return;
     }
-    
+
     // We try to fetch and download as a blob to force the download dialogue
     // If it fails (e.g. CORS), we let the default link behavior happen (new tab)
     try {

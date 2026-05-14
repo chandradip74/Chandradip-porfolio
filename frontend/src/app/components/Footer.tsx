@@ -14,10 +14,10 @@ export default function Footer() {
 
     api.get('/social-media')
       .then(data => { if (data?.length > 0) setSocialMedia(data); })
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
-  const displayName = profile?.name || "Chandradipsinh";
+  const displayName = profile?.name || "Chandradip";
   const currentYear = new Date().getFullYear();
 
   const mainLinks = [
