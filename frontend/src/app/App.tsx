@@ -1,6 +1,6 @@
 import { RouterProvider } from "react-router";
 import { router } from "./routes";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { API_BASE } from "./lib/api";
 import MaintenancePage from "./pages/Maintenance";
 
@@ -9,17 +9,31 @@ interface SiteSettings {
   maintenanceMessage: string;
 }
 
+const POLL_INTERVAL_MS = 20_000; // check every 20 seconds
+
 export default function App() {
   const [settings, setSettings] = useState<SiteSettings | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const fetchSettings = useCallback(() => {
     fetch(`${API_BASE}/settings`)
       .then((res) => res.json())
-      .then((data) => setSettings(data))
-      .catch(() => setSettings({ maintenanceMode: false, maintenanceMessage: "" }))
+      .then((data: SiteSettings) => setSettings(data))
+      .catch(() => {
+        // On error, don't override existing settings — keep whatever we had
+        setSettings((prev) => prev ?? { maintenanceMode: false, maintenanceMessage: "" });
+      })
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    // Initial fetch
+    fetchSettings();
+
+    // Poll every 20 seconds so maintenance mode flips without a page refresh
+    const timer = setInterval(fetchSettings, POLL_INTERVAL_MS);
+    return () => clearInterval(timer);
+  }, [fetchSettings]);
 
   if (loading) {
     return (
