@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Sun, Moon, Monitor, Save, LogOut, Shield, Database, Cloud, Bell, Key, Trash2, CheckCircle, XCircle, Wrench } from 'lucide-react';
+import { useState } from 'react';
+import { Sun, Moon, Monitor, Save, LogOut, Shield, Database, Cloud, Bell, Key, Trash2, CheckCircle, XCircle } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router';
@@ -49,20 +49,6 @@ export function SettingsPage() {
   const [cloudinarySecret, setCloudinarySecret] = useState('••••••••••••••••••••••••');
   const [mongoUri, setMongoUri] = useState('mongodb+srv://user:••••••••@cluster.mongodb.net/portfolio');
 
-  // Maintenance mode state
-  const [maintenanceMode, setMaintenanceMode] = useState(false);
-  const [maintenanceMessage, setMaintenanceMessage] = useState("We're performing scheduled maintenance. We'll be back shortly!");
-  const [maintenanceSaving, setMaintenanceSaving] = useState(false);
-
-  useEffect(() => {
-    api.get('/settings')
-      .then((data: any) => {
-        setMaintenanceMode(data.maintenanceMode ?? false);
-        setMaintenanceMessage(data.maintenanceMessage ?? '');
-      })
-      .catch(() => { /* use defaults */ });
-  }, []);
-
   const handleSaveAccount = async () => {
     if (!username.trim()) { toast.error('Username is required'); return; }
     try {
@@ -94,77 +80,12 @@ export function SettingsPage() {
 
   const handleLogout = () => { logout(); toast.success('Logged out'); navigate('/login'); };
 
-  const handleSaveMaintenance = async () => {
-    setMaintenanceSaving(true);
-    try {
-      await api.put('/settings', { maintenanceMode, maintenanceMessage });
-      toast.success(maintenanceMode ? 'Maintenance mode enabled — site is now offline for visitors.' : 'Maintenance mode disabled — site is live!');
-    } catch (e: any) {
-      toast.error(e.message || 'Failed to update maintenance settings');
-    } finally {
-      setMaintenanceSaving(false);
-    }
-  };
-
   return (
     <div className="max-w-3xl space-y-6">
       {/* Header */}
       <div>
         <h1 className="text-foreground">Settings</h1>
         <p className="text-sm text-muted-foreground mt-0.5">Manage your account and application settings</p>
-      </div>
-
-      {/* Maintenance Mode */}
-      <div className={`bg-card border-2 rounded-xl overflow-hidden transition-colors ${maintenanceMode ? 'border-orange-500/40' : 'border-border'}`}>
-        <div className={`px-6 py-4 border-b transition-colors ${maintenanceMode ? 'border-orange-500/20 bg-orange-500/5' : 'border-border'}`}>
-          <div className="flex items-center gap-2">
-            <Wrench className={`w-4 h-4 ${maintenanceMode ? 'text-orange-500' : 'text-muted-foreground'}`} />
-            <h3 className="text-foreground font-medium">Maintenance Mode</h3>
-            {maintenanceMode && (
-              <span className="ml-auto flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-orange-500/15 text-orange-600 dark:text-orange-400 animate-pulse">
-                <span className="w-1.5 h-1.5 rounded-full bg-orange-500" />
-                ACTIVE
-              </span>
-            )}
-          </div>
-          <p className="text-sm text-muted-foreground mt-0.5">When enabled, visitors will see a maintenance page instead of your portfolio.</p>
-        </div>
-        <div className="p-6 space-y-5">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-foreground">Enable Maintenance Mode</p>
-              <p className="text-xs text-muted-foreground mt-0.5">Toggle to take your site offline for visitors</p>
-            </div>
-            <Toggle checked={maintenanceMode} onChange={setMaintenanceMode} />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-1.5">Maintenance Message</label>
-            <textarea
-              rows={3}
-              value={maintenanceMessage}
-              onChange={(e) => setMaintenanceMessage(e.target.value)}
-              placeholder="We're performing scheduled maintenance..."
-              className="w-full px-3 py-2 text-sm bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-foreground placeholder:text-muted-foreground resize-none"
-            />
-            <p className="text-xs text-muted-foreground mt-1">This message will be displayed on the maintenance page.</p>
-          </div>
-          <button
-            onClick={handleSaveMaintenance}
-            disabled={maintenanceSaving}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-              maintenanceMode
-                ? 'bg-orange-500 text-white hover:bg-orange-600'
-                : 'bg-primary text-primary-foreground hover:opacity-90'
-            } disabled:opacity-60 disabled:cursor-not-allowed`}
-          >
-            {maintenanceSaving ? (
-              <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" /></svg>
-            ) : (
-              <Save className="w-4 h-4" />
-            )}
-            {maintenanceSaving ? 'Saving...' : 'Save Maintenance Settings'}
-          </button>
-        </div>
       </div>
 
       {/* Theme */}
