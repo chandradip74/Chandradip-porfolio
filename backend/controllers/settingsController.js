@@ -1,4 +1,4 @@
-import asyncHandler from 'express-async-handler';
+import asyncHandler from '../middleware/asyncHandler.js';
 import Settings from '../models/Settings.js';
 
 // @desc    Get settings (Public)
