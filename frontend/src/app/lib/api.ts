@@ -18,9 +18,10 @@ const notify = () => {
 };
 
 // Create Axios Instance
+// Timeout is 60s — Render free tier cold starts can take up to 50s
 const axiosInstance = axios.create({
   baseURL: API_BASE,
-  timeout: 10000, // 10 seconds timeout
+  timeout: 60000,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -55,14 +56,42 @@ axiosInstance.interceptors.response.use(
   }
 );
 
+// Retry helper — retries failed GET requests with exponential backoff.
+// Handles Render.com cold starts where the first 1-2 requests may timeout
+// before the server finishes waking up.
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+async function fetchWithRetry(config: any, retries = 3, baseDelay = 3000): Promise<any> {
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const res = await axiosInstance(config);
+      return res.data;
+    } catch (err: any) {
+      const isLastAttempt = attempt === retries;
+      // Only retry on network errors or timeouts (not 4xx/5xx responses)
+      const isRetryable = !err.response || err.code === 'ECONNABORTED' || err.code === 'ERR_NETWORK';
+      if (isLastAttempt || !isRetryable) throw err;
+      // Exponential backoff: 3s, 6s, 12s
+      await delay(baseDelay * Math.pow(2, attempt));
+    }
+  }
+}
+
 export async function apiFetch(path: string, options: any = {}) {
+  const config = {
+    url: path,
+    method: options.method || 'GET',
+    data: options.body,
+    headers: options.headers,
+  };
+
+  // Only GET requests are retried (safe to repeat); mutations are not
+  if (config.method === 'GET') {
+    return fetchWithRetry(config);
+  }
+
   try {
-    const res = await axiosInstance({
-      url: path,
-      method: options.method || 'GET',
-      data: options.body,
-      headers: options.headers,
-    });
+    const res = await axiosInstance(config);
     return res.data;
   } catch (err: any) {
     throw err;
@@ -77,3 +106,10 @@ export const api = {
     apiFetch(path, { method: 'PUT', body }),
   del: (path: string) => apiFetch(path, { method: 'DELETE' }),
 };
+
+// Silent wakeup ping — fires immediately when this module is imported.
+// This starts the Render cold-start process as early as possible, before
+// individual pages even mount and start fetching their own data.
+if (typeof window !== 'undefined') {
+  fetch(`${API_BASE}/profile`, { signal: AbortSignal.timeout(65000) }).catch(() => {});
+}
